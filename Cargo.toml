@@ -1,0 +1,9 @@
+[package]
+name = "gnuplotters"
+version = "0.1.0"
+authors = ["je6bmq"]
+description="CLI graph figure plotter using GNU Plot"
+[dependencies]
+clap="*"
+mktemp="*"
+regex="*"
