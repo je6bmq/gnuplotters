@@ -277,8 +277,8 @@ fn main() {
             .short("a")
             .long("axes")
             .takes_value(true)
-            .multiple(true) 
-            .require_delimiter(true)
+            .multiple(true)
+            .require_delimiter(false)
             .default_value("1:2")
             .validator(axes_validator))
         .arg(Arg::with_name("colors")
@@ -313,7 +313,7 @@ fn main() {
             .takes_value(false));
 
     let args = app.get_matches();
-    let data_files:Vec<&str> = args.values_of("INPUT").unwrap().collect();
+    let data_files: Vec<&str> = args.values_of("INPUT").unwrap().collect();
     let is_script = args.occurrences_of("script") == 1;
     let output_file = if let Some(out) = args.value_of("OUTPUT") {
         out.to_string()
@@ -323,16 +323,20 @@ fn main() {
             .replace(data_files[0], ".pdf")
             .into_owned() // replacement of extension(suffix) in filename
     };
-    let num_series = args.values_of("axes").unwrap().len();
     let axes = args.values_of("axes")
         .unwrap()
         .map(|it| {
-            let s = it.split(":").map(|k| k.parse::<u32>().unwrap()).collect::<Vec<_>>();
-            (s[0], s[1])
+            it.split(",")
+                .map(|s| {
+                    let a = s.split(":").map(|k| k.parse::<u32>().unwrap()).collect::<Vec<_>>();
+                    assert_eq!(a.len(), 2);
+                    (a[0], a[1])
+                })
+                .collect::<Vec<_>>()
         })
         .collect::<Vec<_>>();
     let colors = args.values_of("colors").unwrap().collect::<Vec<_>>();
-    let seriestypes = args.values_of("seriestypes")
+    let series_types = args.values_of("seriestypes")
         .unwrap()
         .map(|it| if it == "l" {
             SeriesType::Line
@@ -341,14 +345,13 @@ fn main() {
         })
         .collect::<Vec<_>>();
     let width = args.value_of("width").unwrap().parse::<f32>().unwrap();
-    let script = (0usize..(num_series as usize))
-        .map(|i| {
-            Series::new(data_files[0].to_string(),
-                        axes[i],
-                        seriestypes[i % seriestypes.len()].clone(),
-                        width,
-                        Color::new(colors[i % colors.len()].to_string()))
-        })
+    let script = axes.iter()
+        .enumerate()
+        .map(|(i, ref ax)| std::iter::repeat(data_files[i]).zip(ax.into_iter()))
+        .flat_map(|it| it)
+        .zip(series_types.into_iter().cycle())
+        .zip(colors.into_iter().cycle())
+        .map(|(((d, &a), s), c)| Series::new(d.to_string(), a, s, width, Color::new(c.to_string())))
         .fold(PlotScript::new().delimiter(",".to_string()),
               |plt, ser| plt.plot(ser))
         .finalize(output_file.clone());
@@ -362,7 +365,8 @@ fn main() {
 
     } else {
 
-        let temp_file = Temp::new_file_in(&(path::Path::new(data_files[0]).parent().unwrap())).unwrap();
+        let temp_file = Temp::new_file_in(&(path::Path::new(data_files[0]).parent().unwrap()))
+            .unwrap();
         let tmp_path = temp_file.as_ref().to_path_buf();
         let tmp_path = tmp_path.as_path().to_str().unwrap();
         let written = File::create(temp_file.as_ref()).unwrap().write_all(script.as_bytes());
