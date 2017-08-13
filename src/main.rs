@@ -129,7 +129,7 @@ impl Color {
     }
 }
 fn axes_validator(arg: String) -> Result<(), String> {
-    if Regex::new(r"([1-9]\d*:[1-9]\d*,)*([1-9]\d*:[1-9]\d*)").unwrap().is_match(arg.as_str()) {
+    if Regex::new(r"^([1-9]\d*:[1-9]\d*,)*([1-9]\d*:[1-9]\d*)$").unwrap().is_match(arg.as_str()) {
         Ok(())
     } else {
         Err(String::from("axes format is invalid .."))
@@ -137,7 +137,7 @@ fn axes_validator(arg: String) -> Result<(), String> {
 }
 fn colors_validator(arg: String) -> Result<(), String> {
     let arg_list: Vec<_> = arg.split(",").collect();
-    let rgb_regex = Regex::new(r"([a-f]|[A-F]|[0-9]){6}").unwrap();
+    let rgb_regex = Regex::new(r"^([a-f]|[A-F]|[0-9]){6}$").unwrap();
     let color_list = ["white",
                       "black",
                       "dark-grey",
@@ -400,8 +400,9 @@ fn main() {
 fn validation_test() {
     assert!(axes_validator("1:2".to_string()).is_ok());
     assert!(colors_validator("red,f8Ab05".to_string()).is_ok());
-}
-#[test]
-fn regex_test() {
-    assert!(Regex::new(regex::escape(path::MAIN_SEPARATOR.to_string().as_str()).as_str()).is_ok());
+    assert!(width_validator("1.00".to_string()).is_ok());
+
+    assert!(axes_validator("1:2,3".to_string()).is_err());
+    assert!(colors_validator("lered,aaaagg".to_string()).is_err());
+    assert!(width_validator("1.0f".to_string()).is_err());
 }
