@@ -338,10 +338,10 @@ fn main() {
     let colors = args.values_of("colors").unwrap().collect::<Vec<_>>();
     let series_types = args.values_of("seriestypes")
         .unwrap()
-        .map(|it| if it == "l" {
-            SeriesType::Line
-        } else {
-            SeriesType::Point
+        .map(|it| match it {
+            "l" => SeriesType::Line,
+            "p" => SeriesType::Point,
+            _ => unimplemented!(),
         })
         .collect::<Vec<_>>();
     let width = args.value_of("width").unwrap().parse::<f32>().unwrap();
