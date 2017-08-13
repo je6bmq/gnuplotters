@@ -266,14 +266,18 @@ fn width_validator(arg: String) -> Result<(), String> {
 }
 fn main() {
     let app = app_from_crate!()
-        .arg(Arg::with_name("INPUT").help("input file name").required(true).index(1))
+        .arg(Arg::with_name("INPUT")
+            .help("input file name")
+            .required(true)
+            .multiple(true)
+            .index(1))
         .arg(Arg::with_name("OUTPUT").help("output file name").required(false).index(2))
         .arg(Arg::with_name("axes")
             .help("axes in input file. (ex. x_a:y_a,x_b:y_b, ...)")
             .short("a")
             .long("axes")
             .takes_value(true)
-            .multiple(true)
+            .multiple(true) 
             .require_delimiter(true)
             .default_value("1:2")
             .validator(axes_validator))
@@ -309,14 +313,14 @@ fn main() {
             .takes_value(false));
 
     let args = app.get_matches();
-    let data_file = args.value_of("INPUT").unwrap();
+    let data_files:Vec<&str> = args.values_of("INPUT").unwrap().collect();
     let is_script = args.occurrences_of("script") == 1;
     let output_file = if let Some(out) = args.value_of("OUTPUT") {
         out.to_string()
     } else {
         Regex::new(r"\.[^.]*$")
             .unwrap()
-            .replace(data_file, ".pdf")
+            .replace(data_files[0], ".pdf")
             .into_owned() // replacement of extension(suffix) in filename
     };
     let num_series = args.values_of("axes").unwrap().len();
@@ -339,7 +343,7 @@ fn main() {
     let width = args.value_of("width").unwrap().parse::<f32>().unwrap();
     let script = (0usize..(num_series as usize))
         .map(|i| {
-            Series::new(data_file.to_string(),
+            Series::new(data_files[0].to_string(),
                         axes[i],
                         seriestypes[i % seriestypes.len()].clone(),
                         width,
@@ -358,7 +362,7 @@ fn main() {
 
     } else {
 
-        let temp_file = Temp::new_file_in(&(path::Path::new(data_file).parent().unwrap())).unwrap();
+        let temp_file = Temp::new_file_in(&(path::Path::new(data_files[0]).parent().unwrap())).unwrap();
         let tmp_path = temp_file.as_ref().to_path_buf();
         let tmp_path = tmp_path.as_path().to_str().unwrap();
         let written = File::create(temp_file.as_ref()).unwrap().write_all(script.as_bytes());
