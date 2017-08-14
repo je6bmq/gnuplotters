@@ -82,12 +82,18 @@ impl PlotScript {
             Color::Name(expr) => format!("\"{}\"", expr),
             Color::Code(expr) => format!("rgb \"#{}\"", expr),
         };
-        format!("set terminal {} enhanced font \"{}\" \nset datafile separator \"{}\" \nset key \
-                 {} \n\nplot \"{}\" using {}:{} with {} lc {} \n{}\nset output \"{}\" \nreplot",
+        format!("set terminal {} enhanced font \"{}\"\nset datafile separator \"{}\"\nset key \
+                 {}\nset output {}\n\nplot \"{}\" using {}:{} with {} lc {} \n{}\nset output \"{}\" \nreplot",
                 self.terminal,
                 self.font,
                 self.delimiter,
                 self.legend_position,
+                if cfg!(target_os = "windows") {
+                    "\"nul\""
+                }
+                else {
+                    "\"/dev/null\""
+                },
                 separator_regex.replace_all(first.data_file.as_str(), r"/"),
                 first.axes.0,
                 first.axes.1,
