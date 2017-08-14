@@ -325,11 +325,12 @@ fn main() {
             .help("output only script file. (without figure file)")
             .short("s")
             .long("script")
-            .takes_value(false));
+            .takes_value(false)
+            .multiple(false));
 
     let args = app.get_matches();
     let data_files: Vec<&str> = args.values_of("INPUTS").unwrap().collect();
-    let is_script = args.occurrences_of("script") == 1;
+    let is_script = args.is_present("script");
     let output_file = if let Some(out) = args.value_of("OUTPUT") {
         out.to_string()
     } else {
