@@ -282,7 +282,7 @@ fn main() {
         .arg(Arg::with_name("axes")
             .help("axes in input file. (ex. x_a:y_a,x_b:y_b, ...)")
             .short("a")
-            .long("axes")
+            .long("axis")
             .takes_value(true)
             .multiple(true)
             .require_delimiter(false)
@@ -291,7 +291,7 @@ fn main() {
         .arg(Arg::with_name("colors")
             .help("plot color in each axes.")
             .short("c")
-            .long("colors")
+            .long("color")
             .takes_value(true)
             .multiple(true)
             .require_delimiter(true)
@@ -300,7 +300,7 @@ fn main() {
         .arg(Arg::with_name("seriestypes")
             .help("linetype in each series.")
             .short("t")
-            .long("seriestypes")
+            .long("seriestype")
             .takes_value(true)
             .multiple(true)
             .require_delimiter(true)
@@ -353,7 +353,7 @@ fn main() {
             _ => unimplemented!(),
         })
         .collect::<Vec<_>>();
-    let widths = args.values_of("width").unwrap().map(|w|w.parse::<f32>().unwrap()).collect::<Vec<_>>();
+    let widths = args.values_of("widths").unwrap().map(|w|w.parse::<f32>().unwrap()).collect::<Vec<_>>();
     let script = axes.iter()
         .enumerate()
         .map(|(i, ref ax)| std::iter::repeat(data_files[i]).zip(ax.into_iter()))
