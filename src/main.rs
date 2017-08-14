@@ -101,7 +101,7 @@ impl PlotScript {
                 color_detector(first.color.clone()),
                 cons.iter()
                     .map(|plt| {
-                format!(" replot \"{}\" using {}:{} with {} lc {} \n",
+                format!("replot \"{}\" using {}:{} with {} lc {} \n",
                         separator_regex.replace_all(plt.data_file.as_str(), r"/"),
                         plt.axes.0,
                         plt.axes.1,
