@@ -266,12 +266,19 @@ fn width_validator(arg: String) -> Result<(), String> {
 }
 fn main() {
     let app = app_from_crate!()
-        .arg(Arg::with_name("INPUT")
-            .help("input file name")
+        .arg(Arg::with_name("INPUTS")
+            .help("input file names")
             .required(true)
             .multiple(true)
-            .index(1))
-        .arg(Arg::with_name("OUTPUT").help("output file name").required(false).index(2))
+            .short("i")
+            .long("input")
+            .takes_value(true))
+        .arg(Arg::with_name("OUTPUT")
+            .help("output file name")
+            .required(false)
+            .short("output")
+            .long("output")
+            .takes_value(true))
         .arg(Arg::with_name("axes")
             .help("axes in input file. (ex. x_a:y_a,x_b:y_b, ...)")
             .short("a")
@@ -313,7 +320,7 @@ fn main() {
             .takes_value(false));
 
     let args = app.get_matches();
-    let data_files: Vec<&str> = args.values_of("INPUT").unwrap().collect();
+    let data_files: Vec<&str> = args.values_of("INPUTS").unwrap().collect();
     let is_script = args.occurrences_of("script") == 1;
     let output_file = if let Some(out) = args.value_of("OUTPUT") {
         out.to_string()
