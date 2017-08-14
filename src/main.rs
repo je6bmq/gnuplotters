@@ -258,7 +258,7 @@ fn colors_validator(arg: String) -> Result<(), String> {
 }
 fn width_validator(arg: String) -> Result<(), String> {
     let width_regex = Regex::new(r"^([1-9][0-9]*|0)(.[0-9]+)?$").unwrap(); // match only floating value
-    if width_regex.is_match(arg.as_str()) {
+    if arg.split(",").all(|s| width_regex.is_match(s)) {
         Ok(())
     } else {
         Err(String::from("width value is not number."))
@@ -306,11 +306,13 @@ fn main() {
             .require_delimiter(true)
             .possible_values(&["l", "p"])
             .default_value("l"))
-        .arg(Arg::with_name("width")
+        .arg(Arg::with_name("widths")
             .help("each line width")
             .short("w")
             .long("width")
             .takes_value(true)
+            .multiple(true)
+            .require_delimiter(true)
             .default_value("1")
             .validator(width_validator))
         .arg(Arg::with_name("script")
@@ -351,14 +353,15 @@ fn main() {
             _ => unimplemented!(),
         })
         .collect::<Vec<_>>();
-    let width = args.value_of("width").unwrap().parse::<f32>().unwrap();
+    let widths = args.values_of("width").unwrap().map(|w|w.parse::<f32>().unwrap()).collect::<Vec<_>>();
     let script = axes.iter()
         .enumerate()
         .map(|(i, ref ax)| std::iter::repeat(data_files[i]).zip(ax.into_iter()))
         .flat_map(|it| it)
         .zip(series_types.into_iter().cycle())
+        .zip(widths.into_iter().cycle())
         .zip(colors.into_iter().cycle())
-        .map(|(((d, &a), s), c)| Series::new(d.to_string(), a, s, width, Color::new(c.to_string())))
+        .map(|((((d, &a), s), w),c)| Series::new(d.to_string(), a, s, w, Color::new(c.to_string())))
         .fold(PlotScript::new().delimiter(",".to_string()),
               |plt, ser| plt.plot(ser))
         .finalize(output_file.clone());
