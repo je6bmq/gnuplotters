@@ -278,6 +278,14 @@ fn widths_validator(arg: String) -> Result<(), String> {
         Err(String::from("width value is not number."))
     }
 }
+fn linetypes_validator(arg: String) -> Result<(), String> {
+    let linetype_regex = Regex::new(r"^\d+$").unwrap();
+    if arg.split(",").all(|s| linetype_regex.is_match(s)) {
+        Ok(())
+    } else {
+        Err(String::from("linetype value is invalid (not positive number)."))
+    }
+}
 fn main() {
     let app = app_from_crate!()
         .arg(Arg::with_name("INPUTS")
@@ -336,7 +344,8 @@ fn main() {
             .takes_value(true)
             .multiple(true)
             .require_delimiter(true)
-            .default_value("1"))
+            .default_value("1")
+            .validator(linetypes_validator))
         .arg(Arg::with_name("script")
             .help("output only script file. (without figure file)")
             .short("s")
@@ -441,8 +450,10 @@ fn validation_test() {
     assert!(colors_validator("red,f8Ab05".to_string()).is_ok());
     assert!(widths_validator("1.00".to_string()).is_ok());
     assert!(widths_validator("1".to_string()).is_ok());
+    assert!(linetypes_validator("1,10,50".to_string()).is_ok());
 
     assert!(axes_validator("1:2,3".to_string()).is_err());
     assert!(colors_validator("lered,aaaagg".to_string()).is_err());
     assert!(widths_validator("1.0f".to_string()).is_err());
+    assert!(linetypes_validator("10,-5,50".to_string()).is_err());
 }
