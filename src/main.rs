@@ -27,6 +27,7 @@ struct Series {
     s_type: SeriesType,
     l_size: f32,
     color: Color,
+    l_type: u32,
 }
 
 #[derive(Debug,PartialEq,Clone)]
@@ -73,40 +74,46 @@ impl PlotScript {
         let (first, cons) = self.plot.split_first().unwrap();
         let separator_regex =
             Regex::new(regex::escape(path::MAIN_SEPARATOR.to_string().as_str()).as_str()).unwrap();
-        let line_detector = |t: SeriesType, s: f32| if t == SeriesType::Line {
+        let series_detector = |t: SeriesType, s: f32| if t == SeriesType::Line {
             format!("line lw {}", s)
         } else {
             format!("point ps {}", s)
+        };
+        let type_detector = |t: SeriesType, lt: u32| match t {
+            SeriesType::Line => format!("dt {}", lt),
+            SeriesType::Point => format!("pt {}", lt),
         };
         let color_detector = |c: Color| match c {
             Color::Name(expr) => format!("\"{}\"", expr),
             Color::Code(expr) => format!("rgb \"#{}\"", expr),
         };
         format!("set terminal {} enhanced font \"{}\"\nset datafile separator \"{}\"\nset key \
-                 {}\nset output {}\n\nplot \"{}\" using {}:{} with {} lc {} \n{}\nset output \"{}\" \nreplot",
+                 {}\nset output {}\n\nplot \"{}\" using {}:{} with {} lc {} {} \n{}\nset output \
+                 \"{}\" \nreplot",
                 self.terminal,
                 self.font,
                 self.delimiter,
                 self.legend_position,
                 if cfg!(target_os = "windows") {
                     "\"nul\""
-                }
-                else {
+                } else {
                     "\"/dev/null\""
                 },
                 separator_regex.replace_all(first.data_file.as_str(), r"/"),
                 first.axes.0,
                 first.axes.1,
-                line_detector(first.s_type.clone(), first.l_size),
+                series_detector(first.s_type.clone(), first.l_size),
                 color_detector(first.color.clone()),
+                type_detector(first.s_type.clone(), first.l_type),
                 cons.iter()
                     .map(|plt| {
-                format!("replot \"{}\" using {}:{} with {} lc {} \n",
+                format!("replot \"{}\" using {}:{} with {} lc {} {}\n",
                         separator_regex.replace_all(plt.data_file.as_str(), r"/"),
                         plt.axes.0,
                         plt.axes.1,
-                        line_detector(plt.s_type.clone(), plt.l_size),
-                        color_detector(plt.color.clone()))
+                        series_detector(plt.s_type.clone(), plt.l_size),
+                        color_detector(plt.color.clone()),
+                        type_detector(plt.s_type.clone(), plt.l_type))
             })
                     .collect::<Vec<_>>()
                     .join(""),
@@ -114,13 +121,14 @@ impl PlotScript {
     }
 }
 impl Series {
-    fn new(file: String, ax: (u32, u32), typ: SeriesType, size: f32, cl: Color) -> Self {
+    fn new(file: String, ax: (u32, u32), typ: SeriesType, size: f32, cl: Color, lt: u32) -> Self {
         Series {
             data_file: file,
             axes: ax,
             s_type: typ,
             l_size: size,
             color: cl,
+            l_type: lt,
         }
     }
 }
@@ -304,7 +312,7 @@ fn main() {
             .default_value("black")
             .validator(colors_validator))
         .arg(Arg::with_name("seriestypes")
-            .help("linetype in each series.")
+            .help("series type in each series.")
             .short("t")
             .long("seriestype")
             .takes_value(true)
@@ -321,6 +329,14 @@ fn main() {
             .require_delimiter(true)
             .default_value("1")
             .validator(width_validator))
+        .arg(Arg::with_name("linetypes")
+            .help("line type in each series.")
+            .short("l")
+            .long("linetype")
+            .takes_value(true)
+            .multiple(true)
+            .require_delimiter(true)
+            .default_value("1"))
         .arg(Arg::with_name("script")
             .help("output only script file. (without figure file)")
             .short("s")
@@ -360,7 +376,10 @@ fn main() {
             _ => unimplemented!(),
         })
         .collect::<Vec<_>>();
-    let widths = args.values_of("widths").unwrap().map(|w|w.parse::<f32>().unwrap()).collect::<Vec<_>>();
+    let widths =
+        args.values_of("widths").unwrap().map(|w| w.parse::<f32>().unwrap()).collect::<Vec<_>>();
+    let linetypes =
+        args.values_of("linetypes").unwrap().map(|w| w.parse::<u32>().unwrap()).collect::<Vec<_>>();
     let script = axes.iter()
         .enumerate()
         .map(|(i, ref ax)| std::iter::repeat(data_files[i]).zip(ax.into_iter()))
@@ -368,7 +387,10 @@ fn main() {
         .zip(series_types.into_iter().cycle())
         .zip(widths.into_iter().cycle())
         .zip(colors.into_iter().cycle())
-        .map(|((((d, &a), s), w),c)| Series::new(d.to_string(), a, s, w, Color::new(c.to_string())))
+        .zip(linetypes.into_iter().cycle())
+        .map(|(((((d, &a), s), w), c), lt)| {
+            Series::new(d.to_string(), a, s, w, Color::new(c.to_string()), lt)
+        })
         .fold(PlotScript::new().delimiter(",".to_string()),
               |plt, ser| plt.plot(ser))
         .finalize(output_file.clone());
