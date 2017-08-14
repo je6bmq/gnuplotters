@@ -270,7 +270,7 @@ fn colors_validator(arg: String) -> Result<(), String> {
         Err(String::from("invalid color {name,code}"))
     }
 }
-fn width_validator(arg: String) -> Result<(), String> {
+fn widths_validator(arg: String) -> Result<(), String> {
     let width_regex = Regex::new(r"^([1-9][0-9]*|0)(.[0-9]+)?$").unwrap(); // match only floating value
     if arg.split(",").all(|s| width_regex.is_match(s)) {
         Ok(())
@@ -328,7 +328,7 @@ fn main() {
             .multiple(true)
             .require_delimiter(true)
             .default_value("1")
-            .validator(width_validator))
+            .validator(widths_validator))
         .arg(Arg::with_name("linetypes")
             .help("line type in each series.")
             .short("l")
@@ -439,10 +439,10 @@ fn main() {
 fn validation_test() {
     assert!(axes_validator("1:2".to_string()).is_ok());
     assert!(colors_validator("red,f8Ab05".to_string()).is_ok());
-    assert!(width_validator("1.00".to_string()).is_ok());
-    assert!(width_validator("1".to_string()).is_ok());
+    assert!(widths_validator("1.00".to_string()).is_ok());
+    assert!(widths_validator("1".to_string()).is_ok());
 
     assert!(axes_validator("1:2,3".to_string()).is_err());
     assert!(colors_validator("lered,aaaagg".to_string()).is_err());
-    assert!(width_validator("1.0f".to_string()).is_err());
+    assert!(widths_validator("1.0f".to_string()).is_err());
 }
