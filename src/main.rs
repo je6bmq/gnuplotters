@@ -88,8 +88,6 @@ impl PlotScript {
     }
     fn finalize(&self, output: String) -> String {
         let (first, cons) = self.plot.split_first().unwrap();
-        let separator_regex =
-            Regex::new(regex::escape(path::MAIN_SEPARATOR.to_string().as_str()).as_str()).unwrap();
 
         format!("set terminal {} enhanced font \"{}\"\nset datafile separator \"{}\"\nset key \
                  {}\nset output {}\n\nplot {}\n{}\nset output \
@@ -108,15 +106,13 @@ impl PlotScript {
                     .map(|plt| format!("replot {}\n", plt.to_script()))
                     .collect::<Vec<_>>()
                     .join(""),
-                separator_regex.replace_all(output.as_str(), r"/"))
+                path_split_escaper(output))
     }
 }
 impl Series {
     fn new(file: String, ax: (u32, u32), typ: SeriesType, size: f32, cl: Color, lt: u32) -> Self {
-        let separator_regex =
-            Regex::new(regex::escape(path::MAIN_SEPARATOR.to_string().as_str()).as_str()).unwrap();
         Series {
-            data_file: separator_regex.replace_all(file.as_str(), r"/").to_string(),
+            data_file: path_split_escaper(file),
             axes: ax,
             s_type: typ,
             l_size: size,
@@ -296,7 +292,9 @@ fn linetypes_validator(arg: String) -> Result<(), String> {
     }
 }
 fn path_split_escaper(s:String) -> String {
-    unimplemented!();
+        let separator_regex =
+            Regex::new(regex::escape(path::MAIN_SEPARATOR.to_string().as_str()).as_str()).unwrap();
+        separator_regex.replace_all(s.as_str(), r"/").to_string() 
 }
 fn main() {
     let app = app_from_crate!()
