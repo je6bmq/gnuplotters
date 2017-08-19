@@ -506,3 +506,10 @@ fn color_specifier_test() {
     assert_eq!(red.specifier(), "\"red\"".to_string());
     assert_eq!(blue_code.specifier(), "rgb \"#0000FF\"".to_string());
 }
+#[test]
+fn series_to_plot_test() {
+    let series=Series::new("test.csv".to_string(),(1,2),SeriesType::Line,1.5,Color::new("red".to_string()),1);
+    assert_eq!(series.to_script(), "\"test.csv\" using 1:2 with line lw 1.5 lc red dt 1".to_string());
+    let series=Series::new("hoge.csv".to_string(),(10,5),SeriesType::Point,1.0,Color::new("afBF55".to_string()),15);
+    assert_eq!(series.to_script(), "\"hoge.csv\" using 10:5 with point ps 1 lc \"#afBF55\" dt 15".to_string());
+}
