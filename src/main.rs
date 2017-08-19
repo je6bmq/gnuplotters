@@ -99,10 +99,10 @@ impl PlotScript {
         //     SeriesType::Line => format!("dt {}", lt),
         //     SeriesType::Point => format!("pt {}", lt),
         // };
-        let color_detector = |c: Color| match c {
-            Color::Name(expr) => format!("\"{}\"", expr),
-            Color::Code(expr) => format!("rgb \"#{}\"", expr),
-        };
+        // let color_detector = |c: Color| match c {
+        //     Color::Name(expr) => format!("\"{}\"", expr),
+        //     Color::Code(expr) => format!("rgb \"#{}\"", expr),
+        // };
         format!("set terminal {} enhanced font \"{}\"\nset datafile separator \"{}\"\nset key \
                  {}\nset output {}\n\nplot \"{}\" using {}:{} with {} lc {} {} \n{}\nset output \
                  \"{}\" \nreplot",
@@ -119,7 +119,7 @@ impl PlotScript {
                 first.axes.0,
                 first.axes.1,
                 first.s_type.series_specifier(first.l_size),
-                color_detector(first.color.clone()),
+                first.color.clone().specifier(),
                 first.s_type.linetype_specifier(first.l_type),
                 cons.iter()
                     .map(|plt| {
@@ -128,7 +128,7 @@ impl PlotScript {
                         plt.axes.0,
                         plt.axes.1,
                         plt.s_type.series_specifier(plt.l_size),
-                        color_detector(plt.color.clone()),
+                        plt.color.clone().specifier(),
                         plt.s_type.linetype_specifier(plt.l_type))
             })
                     .collect::<Vec<_>>()
