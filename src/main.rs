@@ -135,6 +135,9 @@ impl Series {
             l_type: lt,
         }
     }
+    fn to_script(self) -> String {
+        unimplemented!();
+    }
 }
 impl Color {
     fn new(arg: String) -> Color {
