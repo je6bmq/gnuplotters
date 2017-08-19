@@ -477,6 +477,10 @@ fn linetypes_validator_test() {
     assert!(linetypes_validator("10,-5,50".to_string()).is_err());
 }
 #[test]
+fn path_split_escaper_test() {
+    assert_eq!(path_split_escaper("C:\\test\\hoge.csv".to_string()), "C:/test/hoge.csv".to_string());
+}
+#[test]
 fn line_specifier_test() {
     assert_eq!(SeriesType::Line.series_specifier(1.0),
                "line lw 1".to_string());
