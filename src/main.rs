@@ -50,6 +50,9 @@ impl PlotScript {
             plot: Vec::new(),
         }
     }
+    fn series_specifier(_type:SeriesType, size:f32) -> String {
+        unimplemented!();
+    }
     fn terminal(&mut self, t: String) -> &mut PlotScript {
         self.terminal = t;
         self
@@ -456,4 +459,9 @@ fn validation_test() {
     assert!(colors_validator("lered,aaaagg".to_string()).is_err());
     assert!(widths_validator("1.0f".to_string()).is_err());
     assert!(linetypes_validator("10,-5,50".to_string()).is_err());
+}
+#[test]
+fn line_specifier_test() {
+    assert_eq!(PlotScript::series_specifier(SeriesType::Line,1.0), "line lw 1.0".to_string());
+    assert_eq!(PlotScript::series_specifier(SeriesType::Point,1.0), "point ps 1.0".to_string());
 }
