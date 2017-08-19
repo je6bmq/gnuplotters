@@ -35,7 +35,7 @@ enum SeriesType {
     Line,
     Point,
 }
-#[derive(Debug,Clone)]
+#[derive(Debug,Clone,PartialEq)]
 enum Color {
     Name(String),
     Code(String),
@@ -498,6 +498,11 @@ fn linetype_specifier_test() {
                "dt 100".to_string());
     assert_eq!(SeriesType::Point.linetype_specifier(100),
                "pt 100".to_string());
+}
+#[test]
+fn color_new_test() {
+    assert_eq!(Color::new("blue".to_string()),Color::Name("blue".to_string()) );
+    assert_eq!(Color::new("99ab55".to_string()),Color::Code("99ab55".to_string()) );
 }
 #[test]
 fn color_specifier_test() {
