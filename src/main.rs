@@ -91,10 +91,10 @@ impl PlotScript {
         // } else {
         //     format!("point ps {}", s)
         // };
-        let type_detector = |t: SeriesType, lt: u32| match t {
-            SeriesType::Line => format!("dt {}", lt),
-            SeriesType::Point => format!("pt {}", lt),
-        };
+        // let type_detector = |t: SeriesType, lt: u32| match t {
+        //     SeriesType::Line => format!("dt {}", lt),
+        //     SeriesType::Point => format!("pt {}", lt),
+        // };
         let color_detector = |c: Color| match c {
             Color::Name(expr) => format!("\"{}\"", expr),
             Color::Code(expr) => format!("rgb \"#{}\"", expr),
@@ -116,7 +116,7 @@ impl PlotScript {
                 first.axes.1,
                 PlotScript::series_specifier(first.s_type.clone(), first.l_size),
                 color_detector(first.color.clone()),
-                type_detector(first.s_type.clone(), first.l_type),
+                PlotScript::linetype_specifier(first.s_type.clone(), first.l_type),
                 cons.iter()
                     .map(|plt| {
                 format!("replot \"{}\" using {}:{} with {} lc {} {}\n",
@@ -125,7 +125,7 @@ impl PlotScript {
                         plt.axes.1,
                         PlotScript::series_specifier(plt.s_type.clone(), plt.l_size),
                         color_detector(plt.color.clone()),
-                        type_detector(plt.s_type.clone(), plt.l_type))
+                        PlotScript::linetype_specifier(plt.s_type.clone(), plt.l_type))
             })
                     .collect::<Vec<_>>()
                     .join(""),
