@@ -40,6 +40,20 @@ enum Color {
     Name(String),
     Code(String),
 }
+impl SeriesType {
+    fn series_specifier(&self, size: f32) -> String {
+        match *self {
+            SeriesType::Line => format!("line lw {}", size),
+            SeriesType::Point => format!("point ps {}", size),
+        }
+    }
+    fn linetype_specifier(&self, linetype: u32) -> String {
+       match *self {
+            SeriesType::Line => format!("dt {}", linetype),
+            SeriesType::Point => format!("pt {}", linetype),
+        }
+    }
+}
 impl PlotScript {
     fn new() -> PlotScript {
         PlotScript {
@@ -50,18 +64,7 @@ impl PlotScript {
             plot: Vec::new(),
         }
     }
-    fn series_specifier(_type: SeriesType, size: f32) -> String {
-        match _type {
-            SeriesType::Line => format!("line lw {}", size),
-            SeriesType::Point => format!("point ps {}", size),
-        }
-    }
-    fn linetype_specifier(_type: SeriesType, linetype: u32) -> String {
-       match _type {
-            SeriesType::Line => format!("dt {}", linetype),
-            SeriesType::Point => format!("pt {}", linetype),
-        }
-    }
+
     fn terminal(&mut self, t: String) -> &mut PlotScript {
         self.terminal = t;
         self
@@ -114,18 +117,18 @@ impl PlotScript {
                 separator_regex.replace_all(first.data_file.as_str(), r"/"),
                 first.axes.0,
                 first.axes.1,
-                PlotScript::series_specifier(first.s_type.clone(), first.l_size),
+                first.s_type.series_specifier(first.l_size),
                 color_detector(first.color.clone()),
-                PlotScript::linetype_specifier(first.s_type.clone(), first.l_type),
+                first.s_type.linetype_specifier(first.l_type),
                 cons.iter()
                     .map(|plt| {
                 format!("replot \"{}\" using {}:{} with {} lc {} {}\n",
                         separator_regex.replace_all(plt.data_file.as_str(), r"/"),
                         plt.axes.0,
                         plt.axes.1,
-                        PlotScript::series_specifier(plt.s_type.clone(), plt.l_size),
+                        plt.s_type.series_specifier(plt.l_size),
                         color_detector(plt.color.clone()),
-                        PlotScript::linetype_specifier(plt.s_type.clone(), plt.l_type))
+                        plt.s_type.linetype_specifier(plt.l_type))
             })
                     .collect::<Vec<_>>()
                     .join(""),
