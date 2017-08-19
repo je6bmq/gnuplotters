@@ -90,9 +90,9 @@ impl PlotScript {
         let (first, cons) = self.plot.split_first().unwrap();
         let separator_regex =
             Regex::new(regex::escape(path::MAIN_SEPARATOR.to_string().as_str()).as_str()).unwrap();
-       
+
         format!("set terminal {} enhanced font \"{}\"\nset datafile separator \"{}\"\nset key \
-                 {}\nset output {}\n\nplot \"{}\" using {}:{} with {} lc {} {} \n{}\nset output \
+                 {}\nset output {}\n\nplot {}\n{}\nset output \
                  \"{}\" \nreplot",
                 self.terminal,
                 self.font,
@@ -103,22 +103,9 @@ impl PlotScript {
                 } else {
                     "\"/dev/null\""
                 },
-                separator_regex.replace_all(first.data_file.as_str(), r"/"),
-                first.axes.0,
-                first.axes.1,
-                first.s_type.series_specifier(first.l_size),
-                first.color.clone().specifier(),
-                first.s_type.linetype_specifier(first.l_type),
+                first.to_script(),
                 cons.iter()
-                    .map(|plt| {
-                format!("replot \"{}\" using {}:{} with {} lc {} {}\n",
-                        separator_regex.replace_all(plt.data_file.as_str(), r"/"),
-                        plt.axes.0,
-                        plt.axes.1,
-                        plt.s_type.series_specifier(plt.l_size),
-                        plt.color.clone().specifier(),
-                        plt.s_type.linetype_specifier(plt.l_type))
-            })
+                    .map(|plt| format!("replot {}\n", plt.to_script()))
                     .collect::<Vec<_>>()
                     .join(""),
                 separator_regex.replace_all(output.as_str(), r"/"))
@@ -126,8 +113,10 @@ impl PlotScript {
 }
 impl Series {
     fn new(file: String, ax: (u32, u32), typ: SeriesType, size: f32, cl: Color, lt: u32) -> Self {
+        let separator_regex =
+            Regex::new(regex::escape(path::MAIN_SEPARATOR.to_string().as_str()).as_str()).unwrap();
         Series {
-            data_file: file,
+            data_file: separator_regex.replace_all(file.as_str(), r"/").to_string(),
             axes: ax,
             s_type: typ,
             l_size: size,
@@ -135,9 +124,15 @@ impl Series {
             l_type: lt,
         }
     }
-    fn to_script(self) -> String {
-        let (x,y)=self.axes;
-        format!("\"{}\" using {}:{} with {} lc {} {}",self.data_file,x,y,self.s_type.series_specifier(self.l_size),self.color.specifier(),self.s_type.linetype_specifier(self.l_type))
+    fn to_script(&self) -> String {
+        let (x, y) = self.axes;
+        format!("\"{}\" using {}:{} with {} lc {} {}",
+                self.data_file,
+                x,
+                y,
+                self.s_type.series_specifier(self.l_size),
+                self.color.clone().specifier(),
+                self.s_type.linetype_specifier(self.l_type))
     }
 }
 impl Color {
@@ -299,6 +294,9 @@ fn linetypes_validator(arg: String) -> Result<(), String> {
     } else {
         Err(String::from("linetype value is invalid (not positive number)."))
     }
+}
+fn path_split_escaper(s:String) -> String {
+    unimplemented!();
 }
 fn main() {
     let app = app_from_crate!()
@@ -502,20 +500,34 @@ fn linetype_specifier_test() {
 }
 #[test]
 fn color_new_test() {
-    assert_eq!(Color::new("blue".to_string()),Color::Name("blue".to_string()) );
-    assert_eq!(Color::new("99ab55".to_string()),Color::Code("99ab55".to_string()) );
+    assert_eq!(Color::new("blue".to_string()),
+               Color::Name("blue".to_string()));
+    assert_eq!(Color::new("99ab55".to_string()),
+               Color::Code("99ab55".to_string()));
 }
 #[test]
 fn color_specifier_test() {
-    let red=Color::Name("red".to_string());
-    let blue_code=Color::Code("0000FF".to_string());
+    let red = Color::Name("red".to_string());
+    let blue_code = Color::Code("0000FF".to_string());
     assert_eq!(red.specifier(), "\"red\"".to_string());
     assert_eq!(blue_code.specifier(), "rgb \"#0000FF\"".to_string());
 }
 #[test]
 fn series_to_plot_test() {
-    let series=Series::new("test.csv".to_string(),(1,2),SeriesType::Line,1.5,Color::new("red".to_string()),1);
-    assert_eq!(series.to_script(), "\"test.csv\" using 1:2 with line lw 1.5 lc \"red\" dt 1".to_string());
-    let series=Series::new("hoge.csv".to_string(),(10,5),SeriesType::Point,1.0,Color::new("afBF55".to_string()),15);
-    assert_eq!(series.to_script(), "\"hoge.csv\" using 10:5 with point ps 1 lc rgb \"#afBF55\" pt 15".to_string());
+    let series = Series::new("test.csv".to_string(),
+                             (1, 2),
+                             SeriesType::Line,
+                             1.5,
+                             Color::new("red".to_string()),
+                             1);
+    assert_eq!(series.to_script(),
+               "\"test.csv\" using 1:2 with line lw 1.5 lc \"red\" dt 1".to_string());
+    let series = Series::new("hoge.csv".to_string(),
+                             (10, 5),
+                             SeriesType::Point,
+                             1.0,
+                             Color::new("afBF55".to_string()),
+                             15);
+    assert_eq!(series.to_script(),
+               "\"hoge.csv\" using 10:5 with point ps 1 lc rgb \"#afBF55\" pt 15".to_string());
 }
