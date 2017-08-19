@@ -40,6 +40,11 @@ enum Color {
     Name(String),
     Code(String),
 }
+impl Color {
+    fn specifier(self) -> String {
+        unimplemented!();
+    }
+}
 impl SeriesType {
     fn series_specifier(&self, size: f32) -> String {
         match *self {
@@ -482,23 +487,23 @@ fn linetypes_validator_test() {
 }
 #[test]
 fn line_specifier_test() {
-    assert_eq!(PlotScript::series_specifier(SeriesType::Line, 1.0),
+    assert_eq!(SeriesType::Line.series_specifier(1.0),
                "line lw 1".to_string());
-    assert_eq!(PlotScript::series_specifier(SeriesType::Point, 1.0),
+    assert_eq!(SeriesType::Point.series_specifier(1.0),
                "point ps 1".to_string());
-    assert_eq!(PlotScript::series_specifier(SeriesType::Line, 1.95),
+    assert_eq!(SeriesType::Line.series_specifier(1.95),
                "line lw 1.95".to_string());
-    assert_eq!(PlotScript::series_specifier(SeriesType::Point, 1.95),
+    assert_eq!(SeriesType::Point.series_specifier(1.95),
                "point ps 1.95".to_string());
 }
 #[test]
 fn linetype_specifier_test() {
-    assert_eq!(PlotScript::linetype_specifier(SeriesType::Line, 1),
+    assert_eq!(SeriesType::Line.linetype_specifier(1),
                "dt 1".to_string());
-    assert_eq!(PlotScript::linetype_specifier(SeriesType::Point, 1),
+    assert_eq!(SeriesType::Point.linetype_specifier(1),
                "pt 1".to_string());
-    assert_eq!(PlotScript::linetype_specifier(SeriesType::Line, 100),
+    assert_eq!(SeriesType::Line.linetype_specifier(100),
                "dt 100".to_string());
-    assert_eq!(PlotScript::linetype_specifier(SeriesType::Point, 100),
+    assert_eq!(SeriesType::Point.linetype_specifier(100),
                "pt 100".to_string());
 }
