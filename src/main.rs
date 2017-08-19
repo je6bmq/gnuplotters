@@ -291,10 +291,10 @@ fn linetypes_validator(arg: String) -> Result<(), String> {
         Err(String::from("linetype value is invalid (not positive number)."))
     }
 }
-fn path_split_escaper(s:String) -> String {
-        let separator_regex =
-            Regex::new(regex::escape(path::MAIN_SEPARATOR.to_string().as_str()).as_str()).unwrap();
-        separator_regex.replace_all(s.as_str(), r"/").to_string() 
+fn path_split_escaper(s: String) -> String {
+    let separator_regex =
+        Regex::new(regex::escape(path::MAIN_SEPARATOR.to_string().as_str()).as_str()).unwrap();
+    separator_regex.replace_all(s.as_str(), r"/").to_string()
 }
 fn main() {
     let app = app_from_crate!()
@@ -478,7 +478,8 @@ fn linetypes_validator_test() {
 }
 #[test]
 fn path_split_escaper_test() {
-    assert_eq!(path_split_escaper("C:\\test\\hoge.csv".to_string()), "C:/test/hoge.csv".to_string());
+    assert_eq!(path_split_escaper("C:\\test\\hoge.csv".to_string()),
+               "C:/test/hoge.csv".to_string());
 }
 #[test]
 fn line_specifier_test() {
