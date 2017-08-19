@@ -158,7 +158,10 @@ impl Color {
         }
     }
     fn specifier(self) -> String {
-        unimplemented!();
+        match self {
+            Color::Name(expr) => format!("\"{}\"", expr),
+            Color::Code(expr) => format!("rgb \"#{}\"", expr),
+        }
     }
 }
 fn axes_validator(arg: String) -> Result<(), String> {
@@ -507,7 +510,7 @@ fn linetype_specifier_test() {
 #[test]
 fn color_specifier_test() {
     let red=Color::Name("red".to_string());
-    let blue_code=Color::Name("#0000FF".to_string());
+    let blue_code=Color::Code("0000FF".to_string());
     assert_eq!(red.specifier(), "\"red\"".to_string());
     assert_eq!(blue_code.specifier(), "rgb \"#0000FF\"".to_string());
 }
