@@ -87,26 +87,33 @@ impl PlotScript {
         self
     }
     fn finalize(&self, output: String) -> String {
-        let (first, cons) = self.plot.split_first().unwrap();
-
-        format!("set terminal {} enhanced font \"{}\"\nset datafile separator \"{}\"\nset key \
-                 {}\nset output {}\n\nplot {}\n{}\nset output \
-                 \"{}\" \nreplot",
-                self.terminal,
-                self.font,
-                self.delimiter,
-                self.legend_position,
-                if cfg!(target_os = "windows") {
-                    "\"nul\""
+        let config = format!("set terminal {} enhanced font \"{}\"\nset datafile separator \
+                              \"{}\"\nset key {}\nset output {}",
+                             self.terminal,
+                             self.font,
+                             self.delimiter,
+                             self.legend_position,
+                             if cfg!(target_os = "windows") {
+                                 "\"nul\""
+                             } else {
+                                 "\"/dev/null\""
+                             });
+        format!("{}{}",
+                config,
+                if let Some((first, cons)) = self.plot.split_first() {
+                    format!("\n\nplot {}\n{}set output \
+                 \"{}\"\nreplot",
+                            first.to_script(),
+                            cons.iter()
+                                .map(|plt| format!("replot {}\n", plt.to_script()))
+                                .collect::<Vec<_>>()
+                                .join(""),
+                            path_split_escaper(output))
                 } else {
-                    "\"/dev/null\""
-                },
-                first.to_script(),
-                cons.iter()
-                    .map(|plt| format!("replot {}\n", plt.to_script()))
-                    .collect::<Vec<_>>()
-                    .join(""),
-                path_split_escaper(output))
+                    format!("")
+                })
+
+
     }
 }
 impl Series {
@@ -533,4 +540,52 @@ fn series_to_plot_test() {
                              15);
     assert_eq!(series.to_script(),
                "\"hoge.csv\" using 10:5 with point ps 1 lc rgb \"#afBF55\" pt 15".to_string());
+}
+#[test]
+fn finalize_test() {
+    let mut script = PlotScript::new();
+    let output = String::from("hoge.pdf");
+    assert_eq!(script.finalize(output.clone()),
+               format!("set terminal pdf enhanced font \"Times New Roman\"\nset datafile \
+                        separator \"\\t\"\nset key below\nset output {}",
+                       if cfg!(target_os = "windows") {
+                           "\"nul\""
+                       } else {
+                           "\"/dev/null\""
+                       }));
+    let series = Series::new("test.csv".to_string(),
+                             (1, 2),
+                             SeriesType::Line,
+                             1.5,
+                             Color::new("red".to_string()),
+                             1);
+    script.plot(series);
+    assert_eq!(script.finalize(output.clone()),
+               format!("set terminal pdf enhanced font \"Times New Roman\"\nset datafile \
+                        separator \"\\t\"\nset key below\nset output {}\n\nplot \"test.csv\" \
+                        using 1:2 with line lw 1.5 lc \"red\" dt 1\nset output \"{}\"\nreplot",
+                       if cfg!(target_os = "windows") {
+                           "\"nul\""
+                       } else {
+                           "\"/dev/null\""
+                       },
+                       output.clone()));
+    let series2 = Series::new("hoge.csv".to_string(),
+                              (10, 5),
+                              SeriesType::Point,
+                              1.0,
+                              Color::new("afBF55".to_string()),
+                              15);
+    script.plot(series2);
+    assert_eq!(script.finalize(output.clone()),
+               format!("set terminal pdf enhanced font \"Times New Roman\"\nset datafile \
+                        separator \"\\t\"\nset key below\nset output {}\n\nplot \"test.csv\" \
+                        using 1:2 with line lw 1.5 lc \"red\" dt 1\nreplot \"hoge.csv\" using \
+                        10:5 with point ps 1 lc rgb \"#afBF55\" pt 15\nset output \"{}\"\nreplot",
+                       if cfg!(target_os = "windows") {
+                           "\"nul\""
+                       } else {
+                           "\"/dev/null\""
+                       },
+                       output.clone()));
 }
