@@ -451,16 +451,24 @@ fn main() {
 }
 
 #[test]
-fn validation_test() {
+fn axes_validatior_test() {
     assert!(axes_validator("1:2".to_string()).is_ok());
+    assert!(axes_validator("1:2,3".to_string()).is_err());
+}
+#[test]
+fn colors_validator_test() {
     assert!(colors_validator("red,f8Ab05".to_string()).is_ok());
+    assert!(colors_validator("lered,aaaagg".to_string()).is_err());
+}
+#[test]
+fn widths_validator_test() {
     assert!(widths_validator("1.00".to_string()).is_ok());
     assert!(widths_validator("1".to_string()).is_ok());
-    assert!(linetypes_validator("1,10,50".to_string()).is_ok());
-
-    assert!(axes_validator("1:2,3".to_string()).is_err());
-    assert!(colors_validator("lered,aaaagg".to_string()).is_err());
     assert!(widths_validator("1.0f".to_string()).is_err());
+}
+#[test]
+fn linetypes_validator_test() {
+    assert!(linetypes_validator("1,10,50".to_string()).is_ok());
     assert!(linetypes_validator("10,-5,50".to_string()).is_err());
 }
 #[test]
