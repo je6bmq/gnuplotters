@@ -56,6 +56,9 @@ impl PlotScript {
             SeriesType::Point => format!("point ps {}", size),
         }
     }
+    fn linetype_specifier(_type: SeriesType, linetype: u32) -> String {
+        unimplemented!();
+    }
     fn terminal(&mut self, t: String) -> &mut PlotScript {
         self.terminal = t;
         self
@@ -481,4 +484,15 @@ fn line_specifier_test() {
                "line lw 1.95".to_string());
     assert_eq!(PlotScript::series_specifier(SeriesType::Point, 1.95),
                "point ps 1.95".to_string());
+}
+#[test]
+fn linetype_specifier_test() {
+    assert_eq!(PlotScript::linetype_specifier(SeriesType::Line, 1),
+               "dt 1".to_string());
+    assert_eq!(PlotScript::linetype_specifier(SeriesType::Point, 1),
+               "pt 1".to_string());
+    assert_eq!(PlotScript::linetype_specifier(SeriesType::Line, 100),
+               "dt 100".to_string());
+    assert_eq!(PlotScript::linetype_specifier(SeriesType::Point, 100),
+               "pt 100".to_string());
 }
