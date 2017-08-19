@@ -57,7 +57,10 @@ impl PlotScript {
         }
     }
     fn linetype_specifier(_type: SeriesType, linetype: u32) -> String {
-        unimplemented!();
+       match _type {
+            SeriesType::Line => format!("dt {}", linetype),
+            SeriesType::Point => format!("pt {}", linetype),
+        }
     }
     fn terminal(&mut self, t: String) -> &mut PlotScript {
         self.terminal = t;
