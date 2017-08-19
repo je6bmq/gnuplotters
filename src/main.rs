@@ -475,6 +475,7 @@ fn axes_validatior_test() {
 fn colors_validator_test() {
     assert!(colors_validator("red,f8Ab05".to_string()).is_ok());
     assert!(colors_validator("lered,aaaagg".to_string()).is_err());
+    assert!(colors_validator("#ABCDEF".to_string()).is_err());
 }
 #[test]
 fn widths_validator_test() {
