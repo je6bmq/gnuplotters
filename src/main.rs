@@ -40,11 +40,7 @@ enum Color {
     Name(String),
     Code(String),
 }
-impl Color {
-    fn specifier(self) -> String {
-        unimplemented!();
-    }
-}
+
 impl SeriesType {
     fn series_specifier(&self, size: f32) -> String {
         match *self {
@@ -53,7 +49,7 @@ impl SeriesType {
         }
     }
     fn linetype_specifier(&self, linetype: u32) -> String {
-       match *self {
+        match *self {
             SeriesType::Line => format!("dt {}", linetype),
             SeriesType::Point => format!("pt {}", linetype),
         }
@@ -160,6 +156,9 @@ impl Color {
         } else {
             Color::Name(arg)
         }
+    }
+    fn specifier(self) -> String {
+        unimplemented!();
     }
 }
 fn axes_validator(arg: String) -> Result<(), String> {
@@ -498,12 +497,17 @@ fn line_specifier_test() {
 }
 #[test]
 fn linetype_specifier_test() {
-    assert_eq!(SeriesType::Line.linetype_specifier(1),
-               "dt 1".to_string());
-    assert_eq!(SeriesType::Point.linetype_specifier(1),
-               "pt 1".to_string());
+    assert_eq!(SeriesType::Line.linetype_specifier(1), "dt 1".to_string());
+    assert_eq!(SeriesType::Point.linetype_specifier(1), "pt 1".to_string());
     assert_eq!(SeriesType::Line.linetype_specifier(100),
                "dt 100".to_string());
     assert_eq!(SeriesType::Point.linetype_specifier(100),
                "pt 100".to_string());
+}
+#[test]
+fn color_specifier_test() {
+    let red=Color::Name("red".to_string());
+    let blue_code=Color::Name("#0000FF".to_string());
+    assert_eq!(red.specifier(), "\"red\"".to_string());
+    assert_eq!(blue_code.specifier(), "rgb \"#0000FF\"".to_string());
 }
