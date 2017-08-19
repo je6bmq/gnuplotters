@@ -90,19 +90,7 @@ impl PlotScript {
         let (first, cons) = self.plot.split_first().unwrap();
         let separator_regex =
             Regex::new(regex::escape(path::MAIN_SEPARATOR.to_string().as_str()).as_str()).unwrap();
-        // let series_detector = |t: SeriesType, s: f32| if t == SeriesType::Line {
-        //     format!("line lw {}", s)
-        // } else {
-        //     format!("point ps {}", s)
-        // };
-        // let type_detector = |t: SeriesType, lt: u32| match t {
-        //     SeriesType::Line => format!("dt {}", lt),
-        //     SeriesType::Point => format!("pt {}", lt),
-        // };
-        // let color_detector = |c: Color| match c {
-        //     Color::Name(expr) => format!("\"{}\"", expr),
-        //     Color::Code(expr) => format!("rgb \"#{}\"", expr),
-        // };
+       
         format!("set terminal {} enhanced font \"{}\"\nset datafile separator \"{}\"\nset key \
                  {}\nset output {}\n\nplot \"{}\" using {}:{} with {} lc {} {} \n{}\nset output \
                  \"{}\" \nreplot",
