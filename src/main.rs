@@ -80,11 +80,11 @@ impl PlotScript {
         let (first, cons) = self.plot.split_first().unwrap();
         let separator_regex =
             Regex::new(regex::escape(path::MAIN_SEPARATOR.to_string().as_str()).as_str()).unwrap();
-        let series_detector = |t: SeriesType, s: f32| if t == SeriesType::Line {
-            format!("line lw {}", s)
-        } else {
-            format!("point ps {}", s)
-        };
+        // let series_detector = |t: SeriesType, s: f32| if t == SeriesType::Line {
+        //     format!("line lw {}", s)
+        // } else {
+        //     format!("point ps {}", s)
+        // };
         let type_detector = |t: SeriesType, lt: u32| match t {
             SeriesType::Line => format!("dt {}", lt),
             SeriesType::Point => format!("pt {}", lt),
@@ -108,7 +108,7 @@ impl PlotScript {
                 separator_regex.replace_all(first.data_file.as_str(), r"/"),
                 first.axes.0,
                 first.axes.1,
-                series_detector(first.s_type.clone(), first.l_size),
+                PlotScript::series_specifier(first.s_type.clone(), first.l_size),
                 color_detector(first.color.clone()),
                 type_detector(first.s_type.clone(), first.l_type),
                 cons.iter()
@@ -117,7 +117,7 @@ impl PlotScript {
                         separator_regex.replace_all(plt.data_file.as_str(), r"/"),
                         plt.axes.0,
                         plt.axes.1,
-                        series_detector(plt.s_type.clone(), plt.l_size),
+                        PlotScript::series_specifier(plt.s_type.clone(), plt.l_size),
                         color_detector(plt.color.clone()),
                         type_detector(plt.s_type.clone(), plt.l_type))
             })
