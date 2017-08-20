@@ -100,11 +100,14 @@ impl PlotScript {
     }
     fn finalize(&self, output: String) -> String {
         let config = format!("set terminal {} enhanced font \"{}\"\nset datafile separator \
-                              \"{}\"\nset key {}\nset output {}",
+                              \"{}\"\nset key {}\nset xlabel \"{}\"\nset ylabel \"{}\"\nset \
+                              output {}",
                              self.terminal,
                              self.font,
                              self.delimiter,
                              self.legend_position,
+                             self.x_label,
+                             self.y_label,
                              if cfg!(target_os = "windows") {
                                  "\"nul\""
                              } else {
