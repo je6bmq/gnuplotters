@@ -20,7 +20,7 @@ struct PlotScript {
     legend_position: String,
     plot: Vec<Series>,
     x_label: String,
-    y_label:String,
+    y_label: String,
 }
 #[derive(Debug)]
 struct Series {
@@ -65,8 +65,8 @@ impl PlotScript {
             delimiter: r"\t".to_string(),
             legend_position: "below".to_string(),
             plot: Vec::new(),
-            x_label:"".to_string(),
-            y_label:"".to_string(),
+            x_label: "".to_string(),
+            y_label: "".to_string(),
         }
     }
 
@@ -86,12 +86,12 @@ impl PlotScript {
         self.legend_position = pos.join(" ");
         self
     }
-    fn x_label(&mut self,label:String) -> &mut PlotScript {
-        self.x_label=label;
+    fn x_label(&mut self, label: String) -> &mut PlotScript {
+        self.x_label = label;
         self
     }
-    fn y_label(&mut self,label:String) -> &mut PlotScript {
-        self.y_label=label;
+    fn y_label(&mut self, label: String) -> &mut PlotScript {
+        self.y_label = label;
         self
     }
     fn plot(&mut self, series: Series) -> &mut PlotScript {
@@ -570,17 +570,22 @@ fn series_to_plot_test() {
                "\"hoge.csv\" using 10:5 with point ps 1 lc rgb \"#afBF55\" pt 15".to_string());
 }
 #[test]
-fn finalize_test() {
-    let mut script = PlotScript::new();
+fn finalize_without_series_test() {
+    let script = PlotScript::new();
     let output = String::from("hoge.pdf");
     assert_eq!(script.finalize(output.clone()),
                format!("set terminal pdf enhanced font \"Times New Roman\"\nset datafile \
-                        separator \"\\t\"\nset key below\nset output {}",
+                        separator \"\\t\"\nset key below\nset xlabel \"\"\nset ylabel \"\"\nset \
+                        output {}",
                        if cfg!(target_os = "windows") {
                            "\"nul\""
                        } else {
                            "\"/dev/null\""
                        }));
+}
+fn finalize_with_series_test() {
+    let mut script = PlotScript::new();
+    let output = String::from("hoge.pdf");
     let series = Series::new("test.csv".to_string(),
                              (1, 2),
                              SeriesType::Line,
@@ -590,8 +595,9 @@ fn finalize_test() {
     script.plot(series);
     assert_eq!(script.finalize(output.clone()),
                format!("set terminal pdf enhanced font \"Times New Roman\"\nset datafile \
-                        separator \"\\t\"\nset key below\nset output {}\n\nplot \"test.csv\" \
-                        using 1:2 with line lw 1.5 lc \"red\" dt 1\nset output \"{}\"\nreplot",
+                        separator \"\\t\"\nset key below\nset xlabel \"\"\nset ylabel \"\"\nset \
+                        output {}\n\nplot \"test.csv\" using 1:2 with line lw 1.5 lc \"red\" dt \
+                        1\nset output \"{}\"\nreplot",
                        if cfg!(target_os = "windows") {
                            "\"nul\""
                        } else {
@@ -607,9 +613,10 @@ fn finalize_test() {
     script.plot(series2);
     assert_eq!(script.finalize(output.clone()),
                format!("set terminal pdf enhanced font \"Times New Roman\"\nset datafile \
-                        separator \"\\t\"\nset key below\nset output {}\n\nplot \"test.csv\" \
-                        using 1:2 with line lw 1.5 lc \"red\" dt 1\nreplot \"hoge.csv\" using \
-                        10:5 with point ps 1 lc rgb \"#afBF55\" pt 15\nset output \"{}\"\nreplot",
+                        separator \"\\t\"\nset key below\nset xlabel \"\"\nset ylabel \"\"\nset \
+                        output {}\n\nplot \"test.csv\" using 1:2 with line lw 1.5 lc \"red\" dt \
+                        1\nreplot \"hoge.csv\" using 10:5 with point ps 1 lc rgb \"#afBF55\" pt \
+                        15\nset output \"{}\"\nreplot",
                        if cfg!(target_os = "windows") {
                            "\"nul\""
                        } else {
