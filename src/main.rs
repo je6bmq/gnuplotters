@@ -19,6 +19,8 @@ struct PlotScript {
     delimiter: String,
     legend_position: String,
     plot: Vec<Series>,
+    x_label: String,
+    y_label:String,
 }
 #[derive(Debug)]
 struct Series {
@@ -63,6 +65,8 @@ impl PlotScript {
             delimiter: r"\t".to_string(),
             legend_position: "below".to_string(),
             plot: Vec::new(),
+            x_label:"".to_string(),
+            y_label:"".to_string(),
         }
     }
 
