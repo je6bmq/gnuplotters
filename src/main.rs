@@ -412,6 +412,8 @@ fn main() {
             .replace(data_files[0], ".pdf")
             .into_owned() // replacement of extension(suffix) in filename
     };
+    let xlabel= args.value_of("xlabel").unwrap().to_string();
+    let ylabel= args.value_of("ylabel").unwrap().to_string();
     let axes = args.values_of("axes")
         .unwrap()
         .map(|it| {
@@ -448,7 +450,7 @@ fn main() {
         .map(|(((((d, &a), s), w), c), lt)| {
             Series::new(d.to_string(), a, s, w, Color::new(c.to_string()), lt)
         })
-        .fold(PlotScript::new().delimiter(",".to_string()),
+        .fold(PlotScript::new().delimiter(",".to_string()).x_label(xlabel).y_label(ylabel),
               |plt, ser| plt.plot(ser))
         .finalize(output_file.clone());
 
