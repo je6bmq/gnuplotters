@@ -86,6 +86,14 @@ impl PlotScript {
         self.legend_position = pos.join(" ");
         self
     }
+    fn x_label(&mut self,label:String) -> &mut PlotScript {
+        self.x_label=label;
+        self
+    }
+    fn y_label(&mut self,label:String) -> &mut PlotScript {
+        self.y_label=label;
+        self
+    }
     fn plot(&mut self, series: Series) -> &mut PlotScript {
         self.plot.push(series);
         self
