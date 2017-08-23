@@ -153,10 +153,15 @@ impl Series {
     }
     fn to_script(&self) -> String {
         let (x, y) = self.axes;
-        format!("\"{}\" using {}:{} with {} lc {} {}",
+        format!("\"{}\" using {}:{} {} with {} lc {} {}",
                 self.data_file,
                 x,
                 y,
+                if let Some(pat) = self.title.clone() {
+                    format!("title \"{}\"", pat)
+                } else {
+                    format!("notitle")
+                },
                 self.s_type.series_specifier(self.l_size),
                 self.color.clone().specifier(),
                 self.s_type.linetype_specifier(self.l_type))
@@ -443,6 +448,7 @@ fn main() {
                 .collect::<Vec<_>>()
         })
         .collect::<Vec<_>>();
+    let titles = args.values_of("titles").unwrap().map(|t| t.to_string()).collect::<Vec<_>>();
     let colors = args.values_of("colors").unwrap().collect::<Vec<_>>();
     let series_types = args.values_of("seriestypes")
         .unwrap()
@@ -460,12 +466,13 @@ fn main() {
         .enumerate()
         .map(|(i, ref ax)| std::iter::repeat(data_files[i]).zip(ax.into_iter()))
         .flat_map(|it| it)
+        .zip(titles.into_iter().chain((0..).map(|_| "".to_string())))
         .zip(series_types.into_iter().cycle())
         .zip(widths.into_iter().cycle())
         .zip(colors.into_iter().cycle())
         .zip(linetypes.into_iter().cycle())
-        .map(|(((((d, &a), s), w), c), lt)| {
-            Series::new(d.to_string(),"".to_string(), a, s, w, Color::new(c.to_string()), lt)
+        .map(|((((((d, &a), t), s), w), c), lt)| {
+            Series::new(d.to_string(), t, a, s, w, Color::new(c.to_string()), lt)
         })
         .fold(PlotScript::new().delimiter(",".to_string()).x_label(xlabel).y_label(ylabel),
               |plt, ser| plt.plot(ser))
@@ -591,7 +598,8 @@ fn series_to_plot_test() {
                              Color::new("afBF55".to_string()),
                              15);
     assert_eq!(series.to_script(),
-               "\"hoge.csv\" using 10:5 notitle with point ps 1 lc rgb \"#afBF55\" pt 15".to_string());
+               "\"hoge.csv\" using 10:5 notitle with point ps 1 lc rgb \"#afBF55\" pt 15"
+                   .to_string());
 }
 #[test]
 fn finalize_without_series_test() {
