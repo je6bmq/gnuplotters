@@ -133,10 +133,17 @@ impl PlotScript {
     }
 }
 impl Series {
-    fn new(file: String, ax: (u32, u32), typ: SeriesType, size: f32, cl: Color, lt: u32) -> Self {
+    fn new(file: String,
+           name: String,
+           ax: (u32, u32),
+           typ: SeriesType,
+           size: f32,
+           cl: Color,
+           lt: u32)
+           -> Self {
         Series {
             data_file: path_split_escaper(file),
-            title: None,
+            title: if name.len() == 0 { None } else { Some(name) },
             axes: ax,
             s_type: typ,
             l_size: size,
@@ -458,7 +465,7 @@ fn main() {
         .zip(colors.into_iter().cycle())
         .zip(linetypes.into_iter().cycle())
         .map(|(((((d, &a), s), w), c), lt)| {
-            Series::new(d.to_string(), a, s, w, Color::new(c.to_string()), lt)
+            Series::new(d.to_string(),"".to_string(), a, s, w, Color::new(c.to_string()), lt)
         })
         .fold(PlotScript::new().delimiter(",".to_string()).x_label(xlabel).y_label(ylabel),
               |plt, ser| plt.plot(ser))
@@ -568,21 +575,23 @@ fn color_specifier_test() {
 #[test]
 fn series_to_plot_test() {
     let series = Series::new("test.csv".to_string(),
+                             "".to_string(),
                              (1, 2),
                              SeriesType::Line,
                              1.5,
                              Color::new("red".to_string()),
                              1);
     assert_eq!(series.to_script(),
-               "\"test.csv\" using 1:2 with line lw 1.5 lc \"red\" dt 1".to_string());
+               "\"test.csv\" using 1:2 notitle with line lw 1.5 lc \"red\" dt 1".to_string());
     let series = Series::new("hoge.csv".to_string(),
+                             "".to_string(),
                              (10, 5),
                              SeriesType::Point,
                              1.0,
                              Color::new("afBF55".to_string()),
                              15);
     assert_eq!(series.to_script(),
-               "\"hoge.csv\" using 10:5 with point ps 1 lc rgb \"#afBF55\" pt 15".to_string());
+               "\"hoge.csv\" using 10:5 notitle with point ps 1 lc rgb \"#afBF55\" pt 15".to_string());
 }
 #[test]
 fn finalize_without_series_test() {
@@ -598,10 +607,12 @@ fn finalize_without_series_test() {
                            "\"/dev/null\""
                        }));
 }
+#[test]
 fn finalize_with_series_test() {
     let mut script = PlotScript::new();
     let output = String::from("hoge.pdf");
     let series = Series::new("test.csv".to_string(),
+                             "".to_string(),
                              (1, 2),
                              SeriesType::Line,
                              1.5,
@@ -611,8 +622,8 @@ fn finalize_with_series_test() {
     assert_eq!(script.finalize(output.clone()),
                format!("set terminal pdf enhanced font \"Times New Roman\"\nset datafile \
                         separator \"\\t\"\nset key below\nset xlabel \"\"\nset ylabel \"\"\nset \
-                        output {}\n\nplot \"test.csv\" using 1:2 with line lw 1.5 lc \"red\" dt \
-                        1\nset output \"{}\"\nreplot",
+                        output {}\n\nplot \"test.csv\" using 1:2 notitle with line lw 1.5 lc \
+                        \"red\" dt 1\nset output \"{}\"\nreplot",
                        if cfg!(target_os = "windows") {
                            "\"nul\""
                        } else {
@@ -620,6 +631,7 @@ fn finalize_with_series_test() {
                        },
                        output.clone()));
     let series2 = Series::new("hoge.csv".to_string(),
+                              "".to_string(),
                               (10, 5),
                               SeriesType::Point,
                               1.0,
@@ -629,9 +641,9 @@ fn finalize_with_series_test() {
     assert_eq!(script.finalize(output.clone()),
                format!("set terminal pdf enhanced font \"Times New Roman\"\nset datafile \
                         separator \"\\t\"\nset key below\nset xlabel \"\"\nset ylabel \"\"\nset \
-                        output {}\n\nplot \"test.csv\" using 1:2 with line lw 1.5 lc \"red\" dt \
-                        1\nreplot \"hoge.csv\" using 10:5 with point ps 1 lc rgb \"#afBF55\" pt \
-                        15\nset output \"{}\"\nreplot",
+                        output {}\n\nplot \"test.csv\" using 1:2 notitle with line lw 1.5 lc \
+                        \"red\" dt 1\nreplot \"hoge.csv\" using 10:5 notitle with point ps 1 lc \
+                        rgb \"#afBF55\" pt 15\nset output \"{}\"\nreplot",
                        if cfg!(target_os = "windows") {
                            "\"nul\""
                        } else {
@@ -649,6 +661,7 @@ fn finalize_custom_script_test() {
         .y_label("Axis Y".to_string());
     let output = String::from("hoge.pdf");
     let series = Series::new("test.csv".to_string(),
+                             "test".to_string(),
                              (1, 2),
                              SeriesType::Line,
                              1.5,
@@ -658,8 +671,8 @@ fn finalize_custom_script_test() {
     assert_eq!(script.finalize(output.clone()),
                format!("set terminal pdf enhanced font \"Century\"\nset datafile separator \
                         \",\"\nset key left top\nset xlabel \"Axis X\"\nset ylabel \"Axis \
-                        Y\"\nset output {}\n\nplot \"test.csv\" using 1:2 with line lw 1.5 lc \
-                        \"red\" dt 1\nset output \"{}\"\nreplot",
+                        Y\"\nset output {}\n\nplot \"test.csv\" using 1:2 title \"test\" with \
+                        line lw 1.5 lc \"red\" dt 1\nset output \"{}\"\nreplot",
                        if cfg!(target_os = "windows") {
                            "\"nul\""
                        } else {
