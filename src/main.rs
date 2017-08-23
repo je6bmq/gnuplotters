@@ -25,6 +25,7 @@ struct PlotScript {
 #[derive(Debug)]
 struct Series {
     data_file: String,
+    title: Option<String>,
     axes: (u32, u32),
     s_type: SeriesType,
     l_size: f32,
@@ -135,6 +136,7 @@ impl Series {
     fn new(file: String, ax: (u32, u32), typ: SeriesType, size: f32, cl: Color, lt: u32) -> Self {
         Series {
             data_file: path_split_escaper(file),
+            title: None,
             axes: ax,
             s_type: typ,
             l_size: size,
@@ -358,6 +360,14 @@ fn main() {
             .require_delimiter(false)
             .default_value("1:2")
             .validator(axes_validator))
+        .arg(Arg::with_name("titles")
+            .help("title in each series.")
+            .short("t")
+            .long("title")
+            .takes_value(true)
+            .multiple(true)
+            .require_delimiter(true)
+            .default_value(""))
         .arg(Arg::with_name("colors")
             .help("plot color in each axes.")
             .short("c")
@@ -369,7 +379,7 @@ fn main() {
             .validator(colors_validator))
         .arg(Arg::with_name("seriestypes")
             .help("series type in each series.")
-            .short("t")
+            .short("s")
             .long("seriestype")
             .takes_value(true)
             .multiple(true)
@@ -394,16 +404,16 @@ fn main() {
             .require_delimiter(true)
             .default_value("1")
             .validator(linetypes_validator))
-        .arg(Arg::with_name("script")
+        .arg(Arg::with_name("file")
             .help("output only script file. (without figure file)")
-            .short("s")
-            .long("script")
+            .short("f")
+            .long("file")
             .takes_value(false)
             .multiple(false));
 
     let args = app.get_matches();
     let data_files: Vec<&str> = args.values_of("INPUTS").unwrap().collect();
-    let is_script = args.is_present("script");
+    let is_script = args.is_present("file");
     let output_file = if let Some(out) = args.value_of("OUTPUT") {
         out.to_string()
     } else {
@@ -412,8 +422,8 @@ fn main() {
             .replace(data_files[0], ".pdf")
             .into_owned() // replacement of extension(suffix) in filename
     };
-    let xlabel= args.value_of("xlabel").unwrap().to_string();
-    let ylabel= args.value_of("ylabel").unwrap().to_string();
+    let xlabel = args.value_of("xlabel").unwrap().to_string();
+    let ylabel = args.value_of("ylabel").unwrap().to_string();
     let axes = args.values_of("axes")
         .unwrap()
         .map(|it| {
