@@ -37,6 +37,7 @@ struct Series {
 enum SeriesType {
     Line,
     Point,
+    YERRORBAR,
 }
 #[derive(Debug,Clone,PartialEq)]
 enum Color {
@@ -49,12 +50,14 @@ impl SeriesType {
         match *self {
             SeriesType::Line => format!("line lw {}", size),
             SeriesType::Point => format!("point ps {}", size),
+            SeriesType::YERRORBAR => unimplemented!(),
         }
     }
     fn linetype_specifier(&self, linetype: u32) -> String {
         match *self {
             SeriesType::Line => format!("dt {}", linetype),
             SeriesType::Point => format!("pt {}", linetype),
+            SeriesType::YERRORBAR => unimplemented!(),
         }
     }
 }
@@ -184,8 +187,8 @@ impl Color {
     }
 }
 fn axes_validator(arg: String) -> Result<(), String> {
-    let axes_regex=Regex::new(r"^[1-9]\d*:[1-9]\d*(:[1-9]\d*)*$").unwrap();
-    if arg.split(",").all(|s|axes_regex.is_match(s)) {
+    let axes_regex = Regex::new(r"^[1-9]\d*:[1-9]\d*(:[1-9]\d*)*$").unwrap();
+    if arg.split(",").all(|s| axes_regex.is_match(s)) {
         Ok(())
     } else {
         Err(String::from("axes format is invalid .."))
