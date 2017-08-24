@@ -160,8 +160,14 @@ impl Series {
         let (x, y) = self.axes;
         format!("\"{}\" using {} {} with {} lc {} {}",
                 self.data_file,
-                format!("{}:{}{}",x,y, if self.s_type==SeriesType::YERRORBAR {format!(":{}",self.y_errorbar.unwrap_or(y+1))} else {"".to_string()})
-                ,
+                format!("{}:{}{}",
+                        x,
+                        y,
+                        if self.s_type == SeriesType::YERRORBAR {
+                            format!(":{}", self.y_errorbar.unwrap_or(y + 1))
+                        } else {
+                            "".to_string()
+                        }),
                 if let Some(pat) = self.title.clone() {
                     format!("title \"{}\"", pat)
                 } else {
@@ -402,7 +408,7 @@ fn main() {
             .takes_value(true)
             .multiple(true)
             .require_delimiter(true)
-            .possible_values(&["l", "p","y"])
+            .possible_values(&["l", "p", "y"])
             .default_value("l"))
         .arg(Arg::with_name("widths")
             .help("each line width")
@@ -446,9 +452,7 @@ fn main() {
         .unwrap()
         .map(|it| {
             it.split(",")
-                .map(|s| {
-                    s.split(":").map(|k| k.parse::<u32>().unwrap()).collect::<Vec<_>>()
-                })
+                .map(|s| s.split(":").map(|k| k.parse::<u32>().unwrap()).collect::<Vec<_>>())
                 .collect::<Vec<_>>()
         })
         .collect::<Vec<_>>();
@@ -479,10 +483,12 @@ fn main() {
         .map(|((((((d, a), t), s), w), c), lt)| {
             Series::new(d.to_string(),
                         t,
-                        (a[0],a[1]), //(x,y)
+                        (a[0], a[1]), //(x,y)
                         if let Some(&y_error) = a.get(2) {
                             Some(y_error)
-                        } else {None},
+                        } else {
+                            None
+                        },
                         s,
                         w,
                         Color::new(c.to_string()),
@@ -638,7 +644,7 @@ fn series_to_plot_test() {
     assert_eq!(series.to_script(),
                "\"hoge.csv\" using 10:5:6 notitle with yerrorbars ps 1 lc rgb \"#afBF55\" pt 15"
                    .to_string());
-        let series = Series::new("hoge.csv".to_string(),
+    let series = Series::new("hoge.csv".to_string(),
                              "".to_string(),
                              (10, 5),
                              Some(11),
