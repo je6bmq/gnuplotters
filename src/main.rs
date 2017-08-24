@@ -65,7 +65,7 @@ impl PlotScript {
     fn new() -> PlotScript {
         PlotScript {
             terminal: "pdf".to_string(),
-            font: "Times New Roman".to_string(),
+            font: "Times New Roman, 13".to_string(),
             delimiter: r"\t".to_string(),
             legend_position: "below".to_string(),
             plot: Vec::new(),
@@ -661,7 +661,7 @@ fn finalize_without_series_test() {
     let script = PlotScript::new();
     let output = String::from("hoge.pdf");
     assert_eq!(script.finalize(output.clone()),
-               format!("set terminal pdf enhanced font \"Times New Roman\"\nset datafile \
+               format!("set terminal pdf enhanced font \"Times New Roman, 13\"\nset datafile \
                         separator \"\\t\"\nset key below\nset xlabel \"\"\nset ylabel \"\"\nset \
                         output {}",
                        if cfg!(target_os = "windows") {
@@ -684,7 +684,7 @@ fn finalize_with_series_test() {
                              1);
     script.plot(series);
     assert_eq!(script.finalize(output.clone()),
-               format!("set terminal pdf enhanced font \"Times New Roman\"\nset datafile \
+               format!("set terminal pdf enhanced font \"Times New Roman, 13\"\nset datafile \
                         separator \"\\t\"\nset key below\nset xlabel \"\"\nset ylabel \"\"\nset \
                         output {}\n\nplot \"test.csv\" using 1:2 notitle with line lw 1.5 lc \
                         \"red\" dt 1\nset output \"{}\"\nreplot",
@@ -704,7 +704,7 @@ fn finalize_with_series_test() {
                               15);
     script.plot(series2);
     assert_eq!(script.finalize(output.clone()),
-               format!("set terminal pdf enhanced font \"Times New Roman\"\nset datafile \
+               format!("set terminal pdf enhanced font \"Times New Roman, 13\"\nset datafile \
                         separator \"\\t\"\nset key below\nset xlabel \"\"\nset ylabel \"\"\nset \
                         output {}\n\nplot \"test.csv\" using 1:2 notitle with line lw 1.5 lc \
                         \"red\" dt 1\nreplot \"hoge.csv\" using 10:5 notitle with point ps 1 lc \
