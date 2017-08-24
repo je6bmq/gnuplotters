@@ -184,7 +184,8 @@ impl Color {
     }
 }
 fn axes_validator(arg: String) -> Result<(), String> {
-    if Regex::new(r"^([1-9]\d*:[1-9]\d*,)*([1-9]\d*:[1-9]\d*)$").unwrap().is_match(arg.as_str()) {
+    let axes_regex=Regex::new(r"^[1-9]\d*:[1-9]\d*(:[1-9]\d*)*$").unwrap();
+    if arg.split(",").all(|s|axes_regex.is_match(s)) {
         Ok(())
     } else {
         Err(String::from("axes format is invalid .."))
@@ -521,7 +522,9 @@ fn main() {
 #[test]
 fn axes_validatior_test() {
     assert!(axes_validator("1:2".to_string()).is_ok());
+    assert!(axes_validator("1:2:3,1:2".to_string()).is_ok());
     assert!(axes_validator("1:2,3".to_string()).is_err());
+    assert!(axes_validator("1:2:".to_string()).is_err());
 }
 #[test]
 fn colors_validator_test() {
