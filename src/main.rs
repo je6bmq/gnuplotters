@@ -189,7 +189,7 @@ impl Color {
     }
 }
 fn axes_validator(arg: String) -> Result<(), String> {
-    let axes_regex = Regex::new(r"^[1-9]\d*:[1-9]\d*(:[1-9]\d*)*$").unwrap();
+    let axes_regex = Regex::new(r"^[1-9]\d*:[1-9]\d*(:[1-9]\d*)?$").unwrap();
     if arg.split(",").all(|s| axes_regex.is_match(s)) {
         Ok(())
     } else {
@@ -402,7 +402,7 @@ fn main() {
             .takes_value(true)
             .multiple(true)
             .require_delimiter(true)
-            .possible_values(&["l", "p"])
+            .possible_values(&["l", "p","y"])
             .default_value("l"))
         .arg(Arg::with_name("widths")
             .help("each line width")
@@ -447,13 +447,7 @@ fn main() {
         .map(|it| {
             it.split(",")
                 .map(|s| {
-                    let a = s.split(":").map(|k| k.parse::<u32>().unwrap()).collect::<Vec<_>>();
-                    assert!(match a.len() {
-                                2 | 3 => true,
-                                _ => false,
-                            },
-                            "axis size error!");
-                    (a[0], a[1])
+                    s.split(":").map(|k| k.parse::<u32>().unwrap()).collect::<Vec<_>>()
                 })
                 .collect::<Vec<_>>()
         })
@@ -465,6 +459,7 @@ fn main() {
         .map(|it| match it {
             "l" => SeriesType::Line,
             "p" => SeriesType::Point,
+            "y" => SeriesType::YERRORBAR,
             _ => unimplemented!(),
         })
         .collect::<Vec<_>>();
@@ -481,11 +476,13 @@ fn main() {
         .zip(widths.into_iter().cycle())
         .zip(colors.into_iter().cycle())
         .zip(linetypes.into_iter().cycle())
-        .map(|((((((d, &a), t), s), w), c), lt)| {
+        .map(|((((((d, a), t), s), w), c), lt)| {
             Series::new(d.to_string(),
                         t,
-                        a,
-                        None,
+                        (a[0],a[1]), //(x,y)
+                        if let Some(&y_error) = a.get(2) {
+                            Some(y_error)
+                        } else {None},
                         s,
                         w,
                         Color::new(c.to_string()),
