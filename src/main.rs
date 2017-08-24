@@ -448,7 +448,10 @@ fn main() {
             it.split(",")
                 .map(|s| {
                     let a = s.split(":").map(|k| k.parse::<u32>().unwrap()).collect::<Vec<_>>();
-                    assert_eq!(a.len(), 2);
+                    assert!(match a.len() {
+                        2|3 => true,
+                        _ => false,
+                    },"axis size error!");
                     (a[0], a[1])
                 })
                 .collect::<Vec<_>>()
@@ -698,7 +701,7 @@ fn finalize_custom_script_test() {
     let series = Series::new("test.csv".to_string(),
                              "test".to_string(),
                              (1, 2),
-                             None,
+                             Some(4),
                              SeriesType::Line,
                              1.5,
                              Color::new("red".to_string()),
@@ -707,8 +710,8 @@ fn finalize_custom_script_test() {
     assert_eq!(script.finalize(output.clone()),
                format!("set terminal pdf enhanced font \"Century\"\nset datafile separator \
                         \",\"\nset key left top\nset xlabel \"Axis X\"\nset ylabel \"Axis \
-                        Y\"\nset output {}\n\nplot \"test.csv\" using 1:2 title \"test\" with \
-                        line lw 1.5 lc \"red\" dt 1\nset output \"{}\"\nreplot",
+                        Y\"\nset output {}\n\nplot \"test.csv\" using 1:2:4 title \"test\" with \
+                        yerrorbars ps 1.5 lc \"red\" pt 1\nset output \"{}\"\nreplot",
                        if cfg!(target_os = "windows") {
                            "\"nul\""
                        } else {
