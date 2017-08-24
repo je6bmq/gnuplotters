@@ -51,7 +51,7 @@ impl SeriesType {
         match *self {
             SeriesType::Line => format!("line lw {}", size),
             SeriesType::Point => format!("point ps {}", size),
-            SeriesType::YERRORBAR => format!("yerrorbars ps {}",size),
+            SeriesType::YERRORBAR => format!("yerrorbars ps {}", size),
         }
     }
     fn linetype_specifier(&self, linetype: u32) -> String {
@@ -158,10 +158,10 @@ impl Series {
     }
     fn to_script(&self) -> String {
         let (x, y) = self.axes;
-        format!("\"{}\" using {}:{} {} with {} lc {} {}",
+        format!("\"{}\" using {} {} with {} lc {} {}",
                 self.data_file,
-                x,
-                y,
+                format!("{}:{}{}",x,y, if self.s_type==SeriesType::YERRORBAR {format!(":{}",self.y_errorbar.unwrap_or(y+1))} else {"".to_string()})
+                ,
                 if let Some(pat) = self.title.clone() {
                     format!("title \"{}\"", pat)
                 } else {
@@ -449,9 +449,10 @@ fn main() {
                 .map(|s| {
                     let a = s.split(":").map(|k| k.parse::<u32>().unwrap()).collect::<Vec<_>>();
                     assert!(match a.len() {
-                        2|3 => true,
-                        _ => false,
-                    },"axis size error!");
+                                2 | 3 => true,
+                                _ => false,
+                            },
+                            "axis size error!");
                     (a[0], a[1])
                 })
                 .collect::<Vec<_>>()
@@ -583,7 +584,8 @@ fn line_specifier_test() {
 fn linetype_specifier_test() {
     assert_eq!(SeriesType::Line.linetype_specifier(1), "dt 1".to_string());
     assert_eq!(SeriesType::Point.linetype_specifier(1), "pt 1".to_string());
-    assert_eq!(SeriesType::YERRORBAR.linetype_specifier(1), "pt 1".to_string());
+    assert_eq!(SeriesType::YERRORBAR.linetype_specifier(1),
+               "pt 1".to_string());
     assert_eq!(SeriesType::Line.linetype_specifier(100),
                "dt 100".to_string());
     assert_eq!(SeriesType::Point.linetype_specifier(100),
@@ -627,6 +629,28 @@ fn series_to_plot_test() {
                              15);
     assert_eq!(series.to_script(),
                "\"hoge.csv\" using 10:5 notitle with point ps 1 lc rgb \"#afBF55\" pt 15"
+                   .to_string());
+    let series = Series::new("hoge.csv".to_string(),
+                             "".to_string(),
+                             (10, 5),
+                             None,
+                             SeriesType::YERRORBAR,
+                             1.0,
+                             Color::new("afBF55".to_string()),
+                             15);
+    assert_eq!(series.to_script(),
+               "\"hoge.csv\" using 10:5:6 notitle with yerrorbars ps 1 lc rgb \"#afBF55\" pt 15"
+                   .to_string());
+        let series = Series::new("hoge.csv".to_string(),
+                             "".to_string(),
+                             (10, 5),
+                             Some(11),
+                             SeriesType::YERRORBAR,
+                             1.0,
+                             Color::new("afBF55".to_string()),
+                             15);
+    assert_eq!(series.to_script(),
+               "\"hoge.csv\" using 10:5:11 notitle with yerrorbars ps 1 lc rgb \"#afBF55\" pt 15"
                    .to_string());
 }
 #[test]
@@ -702,7 +726,7 @@ fn finalize_custom_script_test() {
                              "test".to_string(),
                              (1, 2),
                              Some(4),
-                             SeriesType::Line,
+                             SeriesType::YERRORBAR,
                              1.5,
                              Color::new("red".to_string()),
                              1);
