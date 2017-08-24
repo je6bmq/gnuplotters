@@ -27,6 +27,7 @@ struct Series {
     data_file: String,
     title: Option<String>,
     axes: (u32, u32),
+    y_errorbar: Option<u32>,
     s_type: SeriesType,
     l_size: f32,
     color: Color,
@@ -139,6 +140,7 @@ impl Series {
     fn new(file: String,
            name: String,
            ax: (u32, u32),
+           ye: Option<u32>,
            typ: SeriesType,
            size: f32,
            cl: Color,
@@ -148,6 +150,7 @@ impl Series {
             data_file: path_split_escaper(file),
             title: if name.len() == 0 { None } else { Some(name) },
             axes: ax,
+            y_errorbar: ye,
             s_type: typ,
             l_size: size,
             color: cl,
@@ -476,7 +479,14 @@ fn main() {
         .zip(colors.into_iter().cycle())
         .zip(linetypes.into_iter().cycle())
         .map(|((((((d, &a), t), s), w), c), lt)| {
-            Series::new(d.to_string(), t, a, s, w, Color::new(c.to_string()), lt)
+            Series::new(d.to_string(),
+                        t,
+                        a,
+                        None,
+                        s,
+                        w,
+                        Color::new(c.to_string()),
+                        lt)
         })
         .fold(PlotScript::new().delimiter(",".to_string()).x_label(xlabel).y_label(ylabel),
               |plt, ser| plt.plot(ser))
@@ -589,7 +599,7 @@ fn color_specifier_test() {
 fn series_to_plot_test() {
     let series = Series::new("test.csv".to_string(),
                              "".to_string(),
-                             (1, 2),
+                             (1, 2),None,
                              SeriesType::Line,
                              1.5,
                              Color::new("red".to_string()),
@@ -598,7 +608,7 @@ fn series_to_plot_test() {
                "\"test.csv\" using 1:2 notitle with line lw 1.5 lc \"red\" dt 1".to_string());
     let series = Series::new("hoge.csv".to_string(),
                              "".to_string(),
-                             (10, 5),
+                             (10, 5),None,
                              SeriesType::Point,
                              1.0,
                              Color::new("afBF55".to_string()),
@@ -627,7 +637,7 @@ fn finalize_with_series_test() {
     let output = String::from("hoge.pdf");
     let series = Series::new("test.csv".to_string(),
                              "".to_string(),
-                             (1, 2),
+                             (1, 2),None,
                              SeriesType::Line,
                              1.5,
                              Color::new("red".to_string()),
@@ -646,7 +656,7 @@ fn finalize_with_series_test() {
                        output.clone()));
     let series2 = Series::new("hoge.csv".to_string(),
                               "".to_string(),
-                              (10, 5),
+                              (10, 5),None,
                               SeriesType::Point,
                               1.0,
                               Color::new("afBF55".to_string()),
@@ -676,7 +686,7 @@ fn finalize_custom_script_test() {
     let output = String::from("hoge.pdf");
     let series = Series::new("test.csv".to_string(),
                              "test".to_string(),
-                             (1, 2),
+                             (1, 2),None,
                              SeriesType::Line,
                              1.5,
                              Color::new("red".to_string()),
