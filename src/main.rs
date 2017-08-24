@@ -51,14 +51,13 @@ impl SeriesType {
         match *self {
             SeriesType::Line => format!("line lw {}", size),
             SeriesType::Point => format!("point ps {}", size),
-            SeriesType::YERRORBAR => unimplemented!(),
+            SeriesType::YERRORBAR => format!("yerrorbars ps {}",size),
         }
     }
     fn linetype_specifier(&self, linetype: u32) -> String {
         match *self {
             SeriesType::Line => format!("dt {}", linetype),
-            SeriesType::Point => format!("pt {}", linetype),
-            SeriesType::YERRORBAR => unimplemented!(),
+            SeriesType::Point | SeriesType::YERRORBAR => format!("pt {}", linetype),
         }
     }
 }
@@ -567,18 +566,26 @@ fn line_specifier_test() {
                "line lw 1".to_string());
     assert_eq!(SeriesType::Point.series_specifier(1.0),
                "point ps 1".to_string());
+    assert_eq!(SeriesType::YERRORBAR.series_specifier(1.0),
+               "yerrorbars ps 1".to_string());
     assert_eq!(SeriesType::Line.series_specifier(1.95),
                "line lw 1.95".to_string());
     assert_eq!(SeriesType::Point.series_specifier(1.95),
                "point ps 1.95".to_string());
+
+    assert_eq!(SeriesType::YERRORBAR.series_specifier(1.95),
+               "yerrorbars ps 1.95".to_string());
 }
 #[test]
 fn linetype_specifier_test() {
     assert_eq!(SeriesType::Line.linetype_specifier(1), "dt 1".to_string());
     assert_eq!(SeriesType::Point.linetype_specifier(1), "pt 1".to_string());
+    assert_eq!(SeriesType::YERRORBAR.linetype_specifier(1), "pt 1".to_string());
     assert_eq!(SeriesType::Line.linetype_specifier(100),
                "dt 100".to_string());
     assert_eq!(SeriesType::Point.linetype_specifier(100),
+               "pt 100".to_string());
+    assert_eq!(SeriesType::YERRORBAR.linetype_specifier(100),
                "pt 100".to_string());
 }
 #[test]
@@ -599,7 +606,8 @@ fn color_specifier_test() {
 fn series_to_plot_test() {
     let series = Series::new("test.csv".to_string(),
                              "".to_string(),
-                             (1, 2),None,
+                             (1, 2),
+                             None,
                              SeriesType::Line,
                              1.5,
                              Color::new("red".to_string()),
@@ -608,7 +616,8 @@ fn series_to_plot_test() {
                "\"test.csv\" using 1:2 notitle with line lw 1.5 lc \"red\" dt 1".to_string());
     let series = Series::new("hoge.csv".to_string(),
                              "".to_string(),
-                             (10, 5),None,
+                             (10, 5),
+                             None,
                              SeriesType::Point,
                              1.0,
                              Color::new("afBF55".to_string()),
@@ -637,7 +646,8 @@ fn finalize_with_series_test() {
     let output = String::from("hoge.pdf");
     let series = Series::new("test.csv".to_string(),
                              "".to_string(),
-                             (1, 2),None,
+                             (1, 2),
+                             None,
                              SeriesType::Line,
                              1.5,
                              Color::new("red".to_string()),
@@ -656,7 +666,8 @@ fn finalize_with_series_test() {
                        output.clone()));
     let series2 = Series::new("hoge.csv".to_string(),
                               "".to_string(),
-                              (10, 5),None,
+                              (10, 5),
+                              None,
                               SeriesType::Point,
                               1.0,
                               Color::new("afBF55".to_string()),
@@ -686,7 +697,8 @@ fn finalize_custom_script_test() {
     let output = String::from("hoge.pdf");
     let series = Series::new("test.csv".to_string(),
                              "test".to_string(),
-                             (1, 2),None,
+                             (1, 2),
+                             None,
                              SeriesType::Line,
                              1.5,
                              Color::new("red".to_string()),
