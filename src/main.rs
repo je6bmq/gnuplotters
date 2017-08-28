@@ -347,93 +347,93 @@ fn path_split_escaper(s: String) -> String {
 fn main() {
     let app = app_from_crate!()
         .arg(Arg::with_name("INPUTS")
-            .help("input file names")
-            .required(true)
-            .multiple(true)
-            .short("i")
-            .long("input")
-            .takes_value(true))
+                 .help("input file names")
+                 .required(true)
+                 .multiple(true)
+                 .short("i")
+                 .long("input")
+                 .takes_value(true))
         .arg(Arg::with_name("OUTPUT")
-            .help("output file name")
-            .required(false)
-            .short("output")
-            .long("output")
-            .takes_value(true))
+                 .help("output file name")
+                 .required(false)
+                 .short("output")
+                 .long("output")
+                 .takes_value(true))
         .arg(Arg::with_name("xlabel")
-            .help("xlabel name")
-            .required(false)
-            .short("x")
-            .long("xlabel")
-            .takes_value(true)
-            .multiple(false)
-            .default_value(""))
+                 .help("xlabel name")
+                 .required(false)
+                 .short("x")
+                 .long("xlabel")
+                 .takes_value(true)
+                 .multiple(false)
+                 .default_value(""))
         .arg(Arg::with_name("ylabel")
-            .help("ylabel name")
-            .required(false)
-            .short("y")
-            .long("ylabel")
-            .takes_value(true)
-            .multiple(false)
-            .default_value(""))
+                 .help("ylabel name")
+                 .required(false)
+                 .short("y")
+                 .long("ylabel")
+                 .takes_value(true)
+                 .multiple(false)
+                 .default_value(""))
         .arg(Arg::with_name("axes")
-            .help("axes in input file. (ex. x_a:y_a,x_b:y_b, ...)")
-            .short("a")
-            .long("axis")
-            .takes_value(true)
-            .multiple(true)
-            .require_delimiter(false)
-            .default_value("1:2")
-            .validator(axes_validator))
+                 .help("axes in input file. (ex. x_a:y_a,x_b:y_b, ...)")
+                 .short("a")
+                 .long("axis")
+                 .takes_value(true)
+                 .multiple(true)
+                 .require_delimiter(false)
+                 .default_value("1:2")
+                 .validator(axes_validator))
         .arg(Arg::with_name("titles")
-            .help("title in each series.")
-            .short("t")
-            .long("title")
-            .takes_value(true)
-            .multiple(true)
-            .require_delimiter(true)
-            .default_value(""))
+                 .help("title in each series.")
+                 .short("t")
+                 .long("title")
+                 .takes_value(true)
+                 .multiple(true)
+                 .require_delimiter(true)
+                 .default_value(""))
         .arg(Arg::with_name("colors")
-            .help("plot color in each axes.")
-            .short("c")
-            .long("color")
-            .takes_value(true)
-            .multiple(true)
-            .require_delimiter(true)
-            .default_value("black")
-            .validator(colors_validator))
+                 .help("plot color in each axes.")
+                 .short("c")
+                 .long("color")
+                 .takes_value(true)
+                 .multiple(true)
+                 .require_delimiter(true)
+                 .default_value("black")
+                 .validator(colors_validator))
         .arg(Arg::with_name("seriestypes")
-            .help("series type in each series.")
-            .short("s")
-            .long("seriestype")
-            .takes_value(true)
-            .multiple(true)
-            .require_delimiter(true)
-            .possible_values(&["l", "p", "y"])
-            .default_value("l"))
+                 .help("series type in each series.")
+                 .short("s")
+                 .long("seriestype")
+                 .takes_value(true)
+                 .multiple(true)
+                 .require_delimiter(true)
+                 .possible_values(&["l", "p", "y"])
+                 .default_value("l"))
         .arg(Arg::with_name("widths")
-            .help("each line width")
-            .short("w")
-            .long("width")
-            .takes_value(true)
-            .multiple(true)
-            .require_delimiter(true)
-            .default_value("1")
-            .validator(widths_validator))
+                 .help("each line width")
+                 .short("w")
+                 .long("width")
+                 .takes_value(true)
+                 .multiple(true)
+                 .require_delimiter(true)
+                 .default_value("1")
+                 .validator(widths_validator))
         .arg(Arg::with_name("linetypes")
-            .help("line type in each series.")
-            .short("l")
-            .long("linetype")
-            .takes_value(true)
-            .multiple(true)
-            .require_delimiter(true)
-            .default_value("1")
-            .validator(linetypes_validator))
+                 .help("line type in each series.")
+                 .short("l")
+                 .long("linetype")
+                 .takes_value(true)
+                 .multiple(true)
+                 .require_delimiter(true)
+                 .default_value("1")
+                 .validator(linetypes_validator))
         .arg(Arg::with_name("file")
-            .help("output only script file. (without figure file)")
-            .short("f")
-            .long("file")
-            .takes_value(false)
-            .multiple(false));
+                 .help("output only script file. (without figure file)")
+                 .short("f")
+                 .long("file")
+                 .takes_value(false)
+                 .multiple(false));
 
     let args = app.get_matches();
     let data_files: Vec<&str> = args.values_of("INPUTS").unwrap().collect();
@@ -441,10 +441,7 @@ fn main() {
     let output_file = if let Some(out) = args.value_of("OUTPUT") {
         out.to_string()
     } else {
-        Regex::new(r"\.[^.]*$")
-            .unwrap()
-            .replace(data_files[0], ".pdf")
-            .into_owned() // replacement of extension(suffix) in filename
+        Regex::new(r"\.[^.]*$").unwrap().replace(data_files[0], ".pdf").into_owned() // replacement of extension(suffix) in filename
     };
     let xlabel = args.value_of("xlabel").unwrap().to_string();
     let ylabel = args.value_of("ylabel").unwrap().to_string();
@@ -456,21 +453,28 @@ fn main() {
                 .collect::<Vec<_>>()
         })
         .collect::<Vec<_>>();
-    let titles = args.values_of("titles").unwrap().map(|t| t.to_string()).collect::<Vec<_>>();
+    let titles = args.values_of("titles")
+        .unwrap()
+        .map(|t| t.to_string())
+        .collect::<Vec<_>>();
     let colors = args.values_of("colors").unwrap().collect::<Vec<_>>();
     let series_types = args.values_of("seriestypes")
         .unwrap()
         .map(|it| match it {
-            "l" => SeriesType::Line,
-            "p" => SeriesType::Point,
-            "y" => SeriesType::YERRORBAR,
-            _ => unimplemented!(),
-        })
+                 "l" => SeriesType::Line,
+                 "p" => SeriesType::Point,
+                 "y" => SeriesType::YERRORBAR,
+                 _ => unimplemented!(),
+             })
         .collect::<Vec<_>>();
-    let widths =
-        args.values_of("widths").unwrap().map(|w| w.parse::<f32>().unwrap()).collect::<Vec<_>>();
-    let linetypes =
-        args.values_of("linetypes").unwrap().map(|w| w.parse::<u32>().unwrap()).collect::<Vec<_>>();
+    let widths = args.values_of("widths")
+        .unwrap()
+        .map(|w| w.parse::<f32>().unwrap())
+        .collect::<Vec<_>>();
+    let linetypes = args.values_of("linetypes")
+        .unwrap()
+        .map(|w| w.parse::<u32>().unwrap())
+        .collect::<Vec<_>>();
     let script = axes.iter()
         .enumerate()
         .map(|(i, ref ax)| std::iter::repeat(data_files[i]).zip(ax.into_iter()))
@@ -499,10 +503,8 @@ fn main() {
         .finalize(output_file.clone());
 
     if is_script {
-        let script_file = Regex::new(r"\.[^.]*$")
-            .unwrap()
-            .replace(output_file.as_str(), ".gplot")
-            .into_owned(); // replacement of extension(suffix) in filename
+        let script_file =
+            Regex::new(r"\.[^.]*$").unwrap().replace(output_file.as_str(), ".gplot").into_owned(); // replacement of extension(suffix) in filename
         File::create(script_file).unwrap().write_all(script.as_bytes()).unwrap();
 
     } else {
@@ -514,27 +516,25 @@ fn main() {
         let written = File::create(temp_file.as_ref()).unwrap().write_all(script.as_bytes());
         assert!(written.is_ok());
         let tmp_path = Regex::new(regex::escape(path::MAIN_SEPARATOR.to_string().as_str())
-                .as_str())
-            .unwrap()
-            .replace_all(tmp_path, r"/");
+                                      .as_str())
+                .unwrap()
+                .replace_all(tmp_path, r"/");
 
         let _ = Command::new(if cfg!(target_os = "windows") {
-                "cmd"
-            } else {
-                "sh"
-            })
-            .arg(if cfg!(target_os = "windows") {
-                "/C"
-            } else {
-                "-c"
-            })
-            .arg("gnuplot")
-            .arg("-e")
-            .arg(format!("load \"{}\"",
-                         regex::escape(tmp_path.to_string().as_str()).as_str())
-                .as_str())
-            .output()
-            .expect("failed to execute gnuplot. ");
+                                 "cmd"
+                             } else {
+                                 "sh"
+                             })
+                .arg(if cfg!(target_os = "windows") {
+                         "/C"
+                     } else {
+                         "-c"
+                     })
+                .arg(format!("gnuplot -e \"load \\\"{}\\\"\"",
+                             regex::escape(tmp_path.to_string().as_str()).as_str())
+                             .as_str())
+                .output()
+                .expect("failed to execute gnuplot. ");
     }
 }
 
