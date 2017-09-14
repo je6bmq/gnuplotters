@@ -104,7 +104,7 @@ impl PlotScript {
     }
     fn finalize(&self, output: String) -> String {
         let config = format!("set terminal {} enhanced font \"{}\"\nset datafile separator \
-                              \"{}\"\nset key {}\nset xlabel \"{}\"\nset ylabel \"{}\"\nset \
+                              \"{}\"\nset key {}\nset key box lt 1 lc \"black\"\nset xlabel \"{}\"\nset ylabel \"{}\"\nset \
                               output {}",
                              self.terminal,
                              self.font,
@@ -665,7 +665,7 @@ fn finalize_without_series_test() {
     let output = String::from("hoge.pdf");
     assert_eq!(script.finalize(output.clone()),
                format!("set terminal pdf enhanced font \"Times New Roman, 24\"\nset datafile \
-                        separator \"\\t\"\nset key below\nset xlabel \"\"\nset ylabel \"\"\nset \
+                        separator \"\\t\"\nset key below\nset key box lt 1 lc \"black\"\nset xlabel \"\"\nset ylabel \"\"\nset \
                         output {}",
                        if cfg!(target_os = "windows") {
                            "\"nul\""
@@ -688,7 +688,7 @@ fn finalize_with_series_test() {
     script.plot(series);
     assert_eq!(script.finalize(output.clone()),
                format!("set terminal pdf enhanced font \"Times New Roman, 24\"\nset datafile \
-                        separator \"\\t\"\nset key below\nset xlabel \"\"\nset ylabel \"\"\nset \
+                        separator \"\\t\"\nset key below\nset key box lt 1 lc \"black\"\nset xlabel \"\"\nset ylabel \"\"\nset \
                         output {}\n\nplot \"test.csv\" using 1:2 notitle with line lw 1.5 lc \
                         \"red\" dt 1\nset output \"{}\"\nreplot",
                        if cfg!(target_os = "windows") {
@@ -708,7 +708,7 @@ fn finalize_with_series_test() {
     script.plot(series2);
     assert_eq!(script.finalize(output.clone()),
                format!("set terminal pdf enhanced font \"Times New Roman, 24\"\nset datafile \
-                        separator \"\\t\"\nset key below\nset xlabel \"\"\nset ylabel \"\"\nset \
+                        separator \"\\t\"\nset key below\nset key box lt 1 lc \"black\"\nset xlabel \"\"\nset ylabel \"\"\nset \
                         output {}\n\nplot \"test.csv\" using 1:2 notitle with line lw 1.5 lc \
                         \"red\" dt 1\nreplot \"hoge.csv\" using 10:5 notitle with point ps 1 lc \
                         rgb \"#afBF55\" pt 15\nset output \"{}\"\nreplot",
@@ -739,7 +739,7 @@ fn finalize_custom_script_test() {
     script.plot(series);
     assert_eq!(script.finalize(output.clone()),
                format!("set terminal pdf enhanced font \"Century\"\nset datafile separator \
-                        \",\"\nset key left top\nset xlabel \"Axis X\"\nset ylabel \"Axis \
+                        \",\"\nset key left top\nset key box lt 1 lc \"black\"\nset xlabel \"Axis X\"\nset ylabel \"Axis \
                         Y\"\nset output {}\n\nplot \"test.csv\" using 1:2:4 title \"test\" with \
                         yerrorbars ps 1.5 lc \"red\" pt 1\nset output \"{}\"\nreplot",
                        if cfg!(target_os = "windows") {
