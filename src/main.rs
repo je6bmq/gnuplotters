@@ -464,7 +464,7 @@ fn main() {
             "l" => SeriesType::Line,
             "p" => SeriesType::Point,
             "y" => SeriesType::YERRORBAR,
-            _ => unimplemented!(),
+            _ => unreachable!(),
         })
         .collect::<Vec<_>>();
     let widths = args.values_of("widths")
