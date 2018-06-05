@@ -104,8 +104,8 @@ impl PlotScript {
     }
     fn finalize(&self, output: String) -> String {
         let config = format!("set terminal {} enhanced font \"{}\"\nset datafile separator \
-                              \"{}\"\nset key {}\nset key box lt 1 lc \"black\"\nset xlabel \"{}\"\nset ylabel \"{}\"\nset \
-                              output {}",
+                              \"{}\"\nset key {}\nset key box lt 1 lc \"black\"\nset xlabel \
+                              \"{}\"\nset ylabel \"{}\"\nset output {}",
                              self.terminal,
                              self.font,
                              self.delimiter,
@@ -119,14 +119,18 @@ impl PlotScript {
                              });
         format!("{}{}",
                 config,
-                self.plot.split_first().map(|(first,cons)|      format!("\n\nplot {}\n{}set output \
-                                                                         \"{}\"\nreplot",
-                                                                        first.to_script(),
-                                                                        cons.iter()
-                                                                        .map(|plt| format!("replot {}\n", plt.to_script()))
-                                                                        .collect::<Vec<_>>()
-                                                                        .join(""),
-                                                                        path_split_escaper(output))).unwrap_or("".to_string()))
+                self.plot
+                    .split_first()
+                    .map(|(first, cons)| {
+                format!("\n\nplot {}\n{}set output \"{}\"\nreplot",
+                        first.to_script(),
+                        cons.iter()
+                            .map(|plt| format!("replot {}\n", plt.to_script()))
+                            .collect::<Vec<_>>()
+                            .join(""),
+                        path_split_escaper(output))
+            })
+                    .unwrap_or("".to_string()))
 
 
     }
@@ -164,7 +168,10 @@ impl Series {
                         } else {
                             "".to_string()
                         }),
-                self.title.clone().map(|pat| format!("title \"{}\"", pat)).unwrap_or(format!("notitle")),
+                self.title
+                    .clone()
+                    .map(|pat| format!("title \"{}\"", pat))
+                    .unwrap_or(format!("notitle")),
                 self.s_type.series_specifier(self.l_size),
                 self.color.clone().specifier(),
                 self.s_type.linetype_specifier(self.l_type))
@@ -430,7 +437,9 @@ fn main() {
     let args = app.get_matches();
     let data_files: Vec<&str> = args.values_of("INPUTS").unwrap().collect();
     let is_script = args.is_present("file");
-    let output_file = args.value_of("OUTPUT").map(|out| out.to_string()).unwrap_or(Regex::new(r"\.[^.]*$").unwrap().replace(data_files[0], ".pdf").into_owned());
+    let output_file = args.value_of("OUTPUT")
+        .map(|out| out.to_string())
+        .unwrap_or(Regex::new(r"\.[^.]*$").unwrap().replace(data_files[0], ".pdf").into_owned());
     let xlabel = args.value_of("xlabel").unwrap().to_string();
     let ylabel = args.value_of("ylabel").unwrap().to_string();
     let axes = args.values_of("axes")
@@ -465,7 +474,7 @@ fn main() {
         .collect::<Vec<_>>();
     let script = axes.iter()
         .zip(data_files.iter())
-        .map(|(ax,&data)| std::iter::repeat(data).zip(ax.into_iter()))
+        .map(|(ax, &data)| std::iter::repeat(data).zip(ax.into_iter()))
         .flat_map(|it| it)
         .zip(titles.into_iter().chain((0..).map(|_| "".to_string())))
         .zip(series_types.into_iter().cycle())
@@ -649,8 +658,8 @@ fn finalize_without_series_test() {
     let output = String::from("hoge.pdf");
     assert_eq!(script.finalize(output.clone()),
                format!("set terminal pdf enhanced font \"Times New Roman, 24\"\nset datafile \
-                        separator \"\\t\"\nset key below\nset key box lt 1 lc \"black\"\nset xlabel \"\"\nset ylabel \"\"\nset \
-                        output {}",
+                        separator \"\\t\"\nset key below\nset key box lt 1 lc \"black\"\nset \
+                        xlabel \"\"\nset ylabel \"\"\nset output {}",
                        if cfg!(target_os = "windows") {
                            "\"nul\""
                        } else {
@@ -672,9 +681,9 @@ fn finalize_with_series_test() {
     script.plot(series);
     assert_eq!(script.finalize(output.clone()),
                format!("set terminal pdf enhanced font \"Times New Roman, 24\"\nset datafile \
-                        separator \"\\t\"\nset key below\nset key box lt 1 lc \"black\"\nset xlabel \"\"\nset ylabel \"\"\nset \
-                        output {}\n\nplot \"test.csv\" using 1:2 notitle with line lw 1.5 lc \
-                        \"red\" dt 1\nset output \"{}\"\nreplot",
+                        separator \"\\t\"\nset key below\nset key box lt 1 lc \"black\"\nset \
+                        xlabel \"\"\nset ylabel \"\"\nset output {}\n\nplot \"test.csv\" using \
+                        1:2 notitle with line lw 1.5 lc \"red\" dt 1\nset output \"{}\"\nreplot",
                        if cfg!(target_os = "windows") {
                            "\"nul\""
                        } else {
@@ -692,10 +701,11 @@ fn finalize_with_series_test() {
     script.plot(series2);
     assert_eq!(script.finalize(output.clone()),
                format!("set terminal pdf enhanced font \"Times New Roman, 24\"\nset datafile \
-                        separator \"\\t\"\nset key below\nset key box lt 1 lc \"black\"\nset xlabel \"\"\nset ylabel \"\"\nset \
-                        output {}\n\nplot \"test.csv\" using 1:2 notitle with line lw 1.5 lc \
-                        \"red\" dt 1\nreplot \"hoge.csv\" using 10:5 notitle with point ps 1 lc \
-                        rgb \"#afBF55\" pt 15\nset output \"{}\"\nreplot",
+                        separator \"\\t\"\nset key below\nset key box lt 1 lc \"black\"\nset \
+                        xlabel \"\"\nset ylabel \"\"\nset output {}\n\nplot \"test.csv\" using \
+                        1:2 notitle with line lw 1.5 lc \"red\" dt 1\nreplot \"hoge.csv\" using \
+                        10:5 notitle with point ps 1 lc rgb \"#afBF55\" pt 15\nset output \
+                        \"{}\"\nreplot",
                        if cfg!(target_os = "windows") {
                            "\"nul\""
                        } else {
@@ -723,9 +733,10 @@ fn finalize_custom_script_test() {
     script.plot(series);
     assert_eq!(script.finalize(output.clone()),
                format!("set terminal pdf enhanced font \"Century\"\nset datafile separator \
-                        \",\"\nset key left top\nset key box lt 1 lc \"black\"\nset xlabel \"Axis X\"\nset ylabel \"Axis \
-                        Y\"\nset output {}\n\nplot \"test.csv\" using 1:2:4 title \"test\" with \
-                        yerrorbars ps 1.5 lc \"red\" pt 1\nset output \"{}\"\nreplot",
+                        \",\"\nset key left top\nset key box lt 1 lc \"black\"\nset xlabel \
+                        \"Axis X\"\nset ylabel \"Axis Y\"\nset output {}\n\nplot \"test.csv\" \
+                        using 1:2:4 title \"test\" with yerrorbars ps 1.5 lc \"red\" pt 1\nset \
+                        output \"{}\"\nreplot",
                        if cfg!(target_os = "windows") {
                            "\"nul\""
                        } else {
