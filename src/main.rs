@@ -476,8 +476,8 @@ fn main() {
         .map(|w| w.parse::<u32>().unwrap())
         .collect::<Vec<_>>();
     let script = axes.iter()
-        .enumerate()
-        .map(|(i, ref ax)| std::iter::repeat(data_files[i]).zip(ax.into_iter()))
+        .zip(data_files.iter())
+        .map(|(ax,&data)| std::iter::repeat(data).zip(ax.into_iter()))
         .flat_map(|it| it)
         .zip(titles.into_iter().chain((0..).map(|_| "".to_string())))
         .zip(series_types.into_iter().cycle())
