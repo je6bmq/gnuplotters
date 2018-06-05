@@ -119,18 +119,14 @@ impl PlotScript {
                              });
         format!("{}{}",
                 config,
-                if let Some((first, cons)) = self.plot.split_first() {
-                    format!("\n\nplot {}\n{}set output \
-                 \"{}\"\nreplot",
-                            first.to_script(),
-                            cons.iter()
-                                .map(|plt| format!("replot {}\n", plt.to_script()))
-                                .collect::<Vec<_>>()
-                                .join(""),
-                            path_split_escaper(output))
-                } else {
-                    format!("")
-                })
+                self.plot.split_first().map(|(first,cons)|      format!("\n\nplot {}\n{}set output \
+                                                                         \"{}\"\nreplot",
+                                                                        first.to_script(),
+                                                                        cons.iter()
+                                                                        .map(|plt| format!("replot {}\n", plt.to_script()))
+                                                                        .collect::<Vec<_>>()
+                                                                        .join(""),
+                                                                        path_split_escaper(output))).unwrap_or("".to_string()))
 
 
     }
@@ -168,11 +164,7 @@ impl Series {
                         } else {
                             "".to_string()
                         }),
-                if let Some(pat) = self.title.clone() {
-                    format!("title \"{}\"", pat)
-                } else {
-                    format!("notitle")
-                },
+                self.title.clone().map(|pat| format!("title \"{}\"", pat)).unwrap_or(format!("notitle")),
                 self.s_type.series_specifier(self.l_size),
                 self.color.clone().specifier(),
                 self.s_type.linetype_specifier(self.l_type))
@@ -438,11 +430,7 @@ fn main() {
     let args = app.get_matches();
     let data_files: Vec<&str> = args.values_of("INPUTS").unwrap().collect();
     let is_script = args.is_present("file");
-    let output_file = if let Some(out) = args.value_of("OUTPUT") {
-        out.to_string()
-    } else {
-        Regex::new(r"\.[^.]*$").unwrap().replace(data_files[0], ".pdf").into_owned() // replacement of extension(suffix) in filename
-    };
+    let output_file = args.value_of("OUTPUT").map(|out| out.to_string()).unwrap_or(Regex::new(r"\.[^.]*$").unwrap().replace(data_files[0], ".pdf").into_owned());
     let xlabel = args.value_of("xlabel").unwrap().to_string();
     let ylabel = args.value_of("ylabel").unwrap().to_string();
     let axes = args.values_of("axes")
@@ -488,11 +476,7 @@ fn main() {
             Series::new(d.to_string(),
                         t,
                         (a[0], a[1]), //(x,y)
-                        if let Some(&y_error) = a.get(2) {
-                            Some(y_error)
-                        } else {
-                            None
-                        },
+                        a.get(2).map(|&y_error| y_error),
                         s,
                         w,
                         Color::new(c.to_string()),
