@@ -482,6 +482,7 @@ fn main() {
         .unwrap()
         .map(|w| w.parse::<u32>().unwrap())
         .collect::<Vec<_>>();
+    let fontsize = args.value_of("fontsize").unwrap().to_string();
     let script = axes.iter()
         .zip(data_files.iter())
         .map(|(ax, &data)| std::iter::repeat(data).zip(ax.into_iter()))
@@ -501,7 +502,11 @@ fn main() {
                         Color::new(c.to_string()),
                         lt)
         })
-        .fold(PlotScript::new().delimiter(",".to_string()).x_label(xlabel).y_label(ylabel),
+        .fold(PlotScript::new()
+                  .delimiter(",".to_string())
+                  .font(format!("Times New Roman, {}", fontsize))
+                  .x_label(xlabel)
+                  .y_label(ylabel),
               |plt, ser| plt.plot(ser))
         .finalize(output_file.clone());
 
