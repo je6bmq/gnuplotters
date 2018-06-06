@@ -432,7 +432,17 @@ fn main() {
             .short("f")
             .long("file")
             .takes_value(false)
-            .multiple(false));
+            .multiple(false))
+        .arg(Arg::with_name("fontsize")
+            .help("fontsize in title and label etc..")
+            .long("fontsize")
+            .takes_value(true)
+            .default_value(if cfg!(target_os = "windows") {
+                "12"
+            } else {
+                "24"
+            })
+            .validator(widths_validator));
 
     let args = app.get_matches();
     let data_files: Vec<&str> = args.values_of("INPUTS").unwrap().collect();
