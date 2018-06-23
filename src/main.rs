@@ -67,7 +67,7 @@ impl PlotScript {
             terminal: "pdf".to_string(),
             font: "Times New Roman, 24".to_string(),
             delimiter: r"\t".to_string(),
-            legend_position: "below".to_string(),
+            legend_position: "above".to_string(),
             plot: Vec::new(),
             x_label: "".to_string(),
             y_label: "".to_string(),
@@ -673,7 +673,7 @@ fn finalize_without_series_test() {
     let output = String::from("hoge.pdf");
     assert_eq!(script.finalize(output.clone()),
                format!("set terminal pdf enhanced font \"Times New Roman, 24\"\nset datafile \
-                        separator \"\\t\"\nset key below\nset key box lt 1 lc \"black\"\nset \
+                        separator \"\\t\"\nset key above\nset key box lt 1 lc \"black\"\nset \
                         xlabel \"\"\nset ylabel \"\"\nset output {}",
                        if cfg!(target_os = "windows") {
                            "\"nul\""
@@ -696,7 +696,7 @@ fn finalize_with_series_test() {
     script.plot(series);
     assert_eq!(script.finalize(output.clone()),
                format!("set terminal pdf enhanced font \"Times New Roman, 24\"\nset datafile \
-                        separator \"\\t\"\nset key below\nset key box lt 1 lc \"black\"\nset \
+                        separator \"\\t\"\nset key above\nset key box lt 1 lc \"black\"\nset \
                         xlabel \"\"\nset ylabel \"\"\nset output {}\n\nplot \"test.csv\" using \
                         1:2 notitle with line lw 1.5 lc \"red\" dt 1\nset output \"{}\"\nreplot",
                        if cfg!(target_os = "windows") {
@@ -716,7 +716,7 @@ fn finalize_with_series_test() {
     script.plot(series2);
     assert_eq!(script.finalize(output.clone()),
                format!("set terminal pdf enhanced font \"Times New Roman, 24\"\nset datafile \
-                        separator \"\\t\"\nset key below\nset key box lt 1 lc \"black\"\nset \
+                        separator \"\\t\"\nset key above\nset key box lt 1 lc \"black\"\nset \
                         xlabel \"\"\nset ylabel \"\"\nset output {}\n\nplot \"test.csv\" using \
                         1:2 notitle with line lw 1.5 lc \"red\" dt 1\nreplot \"hoge.csv\" using \
                         10:5 notitle with point ps 1 lc rgb \"#afBF55\" pt 15\nset output \
