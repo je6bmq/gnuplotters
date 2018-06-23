@@ -103,13 +103,15 @@ impl PlotScript {
         self
     }
     fn finalize(&self, output: String) -> String {
+        let is_no_title = self.plot.iter().peekable().all(|ref p| p.title.is_none());
+        let legend_config = if is_no_title {String::from("")} else {format!("set key {}\nset key box lt 1 lc \"black\"\n",self.legend_position)};
         let config = format!("set terminal {} enhanced font \"{}\"\nset datafile separator \
-                              \"{}\"\nset key {}\nset key box lt 1 lc \"black\"\nset xlabel \
+                              \"{}\"\n{}set xlabel \
                               \"{}\"\nset ylabel \"{}\"\nset output {}",
                              self.terminal,
                              self.font,
                              self.delimiter,
-                             self.legend_position,
+                             legend_config,
                              self.x_label,
                              self.y_label,
                              if cfg!(target_os = "windows") {
@@ -673,7 +675,7 @@ fn finalize_without_series_test() {
     let output = String::from("hoge.pdf");
     assert_eq!(script.finalize(output.clone()),
                format!("set terminal pdf enhanced font \"Times New Roman, 24\"\nset datafile \
-                        separator \"\\t\"\nset key above\nset key box lt 1 lc \"black\"\nset \
+                        separator \"\\t\"\nset \
                         xlabel \"\"\nset ylabel \"\"\nset output {}",
                        if cfg!(target_os = "windows") {
                            "\"nul\""
