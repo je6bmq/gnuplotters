@@ -439,10 +439,10 @@ fn main() {
             .help("fontsize in title and label etc..")
             .long("fontsize")
             .takes_value(true)
-            .default_value(if cfg!(target_os = "windows") {
-                "12"
-            } else {
+            .default_value(if cfg!(target_os = "macos") {
                 "24"
+            } else {
+                "12"
             })
             .validator(widths_validator));
 
